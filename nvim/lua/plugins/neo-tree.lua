@@ -10,6 +10,5 @@ return {
     config = function()
         vim.keymap.set('n', '<leader>j', ':Neotree<CR>')
         vim.keymap.set('v', '<leader>j', ':Neotree<CR>')
-        vim.keymap.set('n', '<leader>j', ':Neotree<CR>')
     end
 }
