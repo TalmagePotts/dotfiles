@@ -26,6 +26,7 @@ vim.keymap.set({"n", "v"}, "<leader>s", ":w<CR>")
 
 -- Quit --
 vim.keymap.set({"n", "v"} , "<leader>q", ":qa<CR>")
+vim.keymap.set({"n", "v"} , "<leader>c", ":q<CR>")
 vim.keymap.set("n", "<leader>Q", ":qa!<CR>")
 vim.keymap.set("v", "<leader>Q", "<Esc>:qa!<CR>")
 vim.keymap.set("n", "<leader>w", ":wqa<CR>")
