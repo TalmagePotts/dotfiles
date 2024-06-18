@@ -9,6 +9,6 @@ return {
                 null_ls.builtins.diagnostics.swiftlint,
             },
         })
-        vim.keymap.set("n", "<leader>af", vim.lsp.buf.format, {})
+        vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, {})
     end,
 }

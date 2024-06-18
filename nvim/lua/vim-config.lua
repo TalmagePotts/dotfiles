@@ -37,7 +37,7 @@ vim.opt.fillchars = { eob = " " }
 -- Get rid of delete adding to register --
 vim.keymap.set("n", "dd", '"_dd')
 vim.keymap.set("n", "D", '"_D')
-vim.keymap.set({"n", "v"}, "s", '"_s')
+vim.keymap.set({"n", "v"}, "s", '_s')
 vim.keymap.set({"n", "v"}, "S", '"_S')
 
 -- Notes about shortcuts --
