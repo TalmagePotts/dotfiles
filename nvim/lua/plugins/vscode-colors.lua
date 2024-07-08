@@ -44,6 +44,6 @@ return {
 
         -- load the theme without affecting devicon colors.
 
-        vim.cmd.colorscheme 'vscode'
+        -- vim.cmd.colorscheme 'vscode'
     end
 }
