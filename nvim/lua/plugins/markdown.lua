@@ -8,7 +8,7 @@ return {
 	end,
 	ft = { "markdown" },
     config = function()
-        vim.keymap.set("n", "<leader>p", ":MarkdownPreview<CR>")
-        vim.keymap.set("n", "<leader>ps", ":MarkdownPreviewStop<CR>")
+        vim.keymap.set("n", "<leader>m", ":MarkdownPreview<CR>")
+        vim.keymap.set("n", "<leader>ms", ":MarkdownPreviewStop<CR>")
     end,
 }

@@ -18,6 +18,10 @@ smartindent = true
 vim.keymap.set("v", "<D-<M-[>>", ":m '>+1<CR>gv=gv")
 vim.keymap.set("n", "¯", ":%s/>,/>,\\r/g<CR>")
 
+-- Copy and Paste --
+vim.keymap.set('v', '<leader>c', '"+y')
+vim.keymap.set('n', '<leader>p', '"+p')
+
 -- Make this mode do nothing --
 vim.keymap.set("n", "Q", "<nop>")
 
