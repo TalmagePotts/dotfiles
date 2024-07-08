@@ -140,4 +140,5 @@ alias work='cd ~/code/work'
 eval $(/opt/homebrew/bin/brew shellenv)
 
 # hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x7000000e7,"HIDKeyboardModifierMappingDst":0x700000029}]}'
-# launchctl load ~/Library/LaunchAgents/com.local.KeyRemapping.plist
+launchctl load ~/Library/LaunchAgents/com.local.KeyRemapping.plist
+
