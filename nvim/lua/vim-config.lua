@@ -25,6 +25,9 @@ vim.keymap.set('n', '<leader>p', '"+p')
 -- Make this mode do nothing --
 vim.keymap.set("n", "Q", "<nop>")
 
+-- Relative Line Numbers --
+vim.wo.relativenumber = true
+
 -- Save --
 vim.keymap.set({"n", "v"}, "<leader>s", ":w<CR>")
 
@@ -48,6 +51,7 @@ vim.keymap.set({"n", "v"}, "S", '"_S')
 -- Notes about shortcuts --
 -- <leader> is space
 -- <M-[> is alt + [
+-- <A-[> is alt + [
 -- <D-[> is ctrl + [
 -- <C-[> is cmd + [
 --
