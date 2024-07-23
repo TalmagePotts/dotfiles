@@ -1,8 +1,6 @@
 return {
     'arzg/vim-colors-xcode',
     config = function()
-        vim.cmd.colorscheme 'xcodedark'
-
         -- Set the background color to transparent
         -- Set the background color to transparent for various highlight groups
         vim.cmd("highlight Normal ctermbg=none guibg=none")
