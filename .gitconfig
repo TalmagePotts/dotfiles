@@ -1,0 +1,35 @@
+[user]
+	name = Mikael Weiss
+	email = campingmikael@icloud.com
+
+[core]
+	editor = vim
+	excludesfile = /Users/mikaelweiss/.gitnore
+	pager = less -F -X
+
+[alias]
+	st = status
+	acp = "!f() { git add -A && git commit -m \"$1\" && git push; }; f"
+	br = branch
+	sw = switch
+	ch = checkout
+	branch-prune = "!git fetch -p && for b in $(git for-each-ref --format='%(if:equals=[gone])%(upstream:track)%(then)%(refname:short)%(end)' refs/heads); do git branch -d $b; done"
+
+[init]
+	defaultBranch = main
+
+[pager]
+	branch = false
+[diff]
+	tool = FileMerge
+
+[difftool]
+	prompt = false
+
+[difftool "FileMerge"]
+	cmd = " ~/Applications/FileMerge.app/Contents/Resources/launchfilemerge $LOCAL $REMOTE"
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

@@ -1,0 +1,7 @@
+# ignore xcuser state
+*.xcuserstate
+*.xcuserdatad
+*.DS_Store
+*xcuserdata
+*.xcshareddata
+buildServer.json
