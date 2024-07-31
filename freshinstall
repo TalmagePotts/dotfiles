@@ -1,0 +1,23 @@
+git clone https://github.com/MikaelWeiss/dotfiles.git
+mkdir code
+mv dotfiles code
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/mikaelweiss/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+brew install warp
+brew install nvim
+brew install arc
+brew install figma
+
+cd code
+
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+brew install lazygit
+brew install slack
+
+# symlink .zshrc
+# symlink .gitignore
+# git config --global core.excludesFile ~/.gitnore
+
