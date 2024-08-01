@@ -20,4 +20,15 @@ brew install slack
 # symlink .zshrc
 # symlink .gitignore
 # git config --global core.excludesFile ~/.gitnore
+git config --global user.name Mikael\ Weiss
+git config --global user.email campingmikael@icloud.com
+
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
+mkdir .config
+ln -s ~/code/dotfiles/nvim ~/.config
+ln -s ~/code/dotfiles/.zshrc ~/
+ln -s ~/code/dotfiles/.p10k.zsh ~/
+ln -s ~/code/dotfiles/.gitnore ~/
+ln -s code/dotfiles/.gitconfig ~/
 
