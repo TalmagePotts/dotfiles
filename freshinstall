@@ -9,6 +9,7 @@ brew install warp
 brew install nvim
 brew install arc
 brew install figma
+brew install notion
 
 cd code
 
@@ -16,6 +17,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 
 brew install lazygit
 brew install slack
+brew install sf-symbols
 
 # symlink .zshrc
 # symlink .gitignore
