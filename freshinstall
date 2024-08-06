@@ -10,6 +10,7 @@ brew install nvim
 brew install arc
 brew install figma
 brew install notion
+brew install cursor
 
 cd code
 
