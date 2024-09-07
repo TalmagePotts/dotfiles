@@ -112,7 +112,7 @@ alias s="cd ~/code/strive"
 alias gs="git status"
 alias home="cd"
 alias ops="open ~/code/strive/Strive.xcodeproj/"
-alias opsh="open ~/code/sherpa/Sherpa.xcodeproj/"
+alias opsh="open ~/code/work/sherpa/Sherpa.xcodeproj/"
 alias gdf="git diff --name-only"
 alias gstc=""
 alias lg='lazygit'
@@ -122,6 +122,7 @@ alias gsta='git stash apply'
 alias gst="git stash"
 alias gcm="git commit -m"
 alias m='git switch main'
+alias p='git pull'
 # alias gbc='git checkout -b $1 && git push -u origin $1'
 gbc() {
     git checkout -b $1 && git push -u origin $1
@@ -131,7 +132,8 @@ alias minecraft='open Library/Application\ Support/minecraft'
 alias c='open ~/code/IntroToDatabases'
 alias d='cd ~/code/IntroToDatabases'
 alias h='cd'
-alias w='cd ~/code/work'
+alias w='cd ~/code/work/lms'
+alias opw='open ~/code/work/lms/lms.xcodeproj/'
 alias work='cd ~/code/work'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.

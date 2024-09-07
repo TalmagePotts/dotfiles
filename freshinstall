@@ -1,28 +1,21 @@
-git clone https://github.com/MikaelWeiss/dotfiles.git
 mkdir code
-mv dotfiles code
+mkdir dotfiles
+git clone https://github.com/MikaelWeiss/dotfiles.git ~/code/dotfiles
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/mikaelweiss/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-brew install warp
-brew install nvim
-brew install arc
-brew install figma
-brew install notion
-brew install cursor
+brew install warp nvim arc figma notion cursor
 
 cd code
 
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-brew install lazygit
-brew install slack
-brew install sf-symbols
+brew install lazygit slack sf-symbols
 
-# symlink .zshrc
-# symlink .gitignore
-# git config --global core.excludesFile ~/.gitnore
+symlink dotfiles/.zshrc
+symlink dotfiles/.gitnore
+git config --global core.excludesFile ~/.gitnore
 git config --global user.name Mikael\ Weiss
 git config --global user.email campingmikael@icloud.com
 
