@@ -1,25 +1,38 @@
-mkdir code
-mkdir dotfiles
-git clone https://github.com/MikaelWeiss/dotfiles.git ~/code/dotfiles
+# Make the right directory
+cd
+if [ ! -d "code" ]; then
+  mkdir code
+  echo "Directory 'code' created"
+else
+  echo "Directory 'code' already exists"
+fi
+
+# Move the files there
+mv dotfiles code
+
+# Install brew and then install the apps I use most
+
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/mikaelweiss/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-brew install warp nvim arc figma notion cursor
+brew install warp nvim arc figma notion cursor lazygit slack sf-symbols
 
-cd code
-
+# Set up oh my zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-brew install lazygit slack sf-symbols
-
-symlink dotfiles/.zshrc
-symlink dotfiles/.gitnore
+# Set up github config
 git config --global core.excludesFile ~/.gitnore
 git config --global user.name Mikael\ Weiss
 git config --global user.email campingmikael@icloud.com
 
+# Set up the terminal the way I like
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
+# Link stuff from my dotfiles to the right locations
+
+symlink dotfiles/.zshrc
+symlink dotfiles/.gitnore
 
 mkdir .config
 ln -s ~/code/dotfiles/nvim ~/.config
