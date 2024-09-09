@@ -41,3 +41,6 @@ ln -s ~/code/dotfiles/.p10k.zsh ~/
 ln -s ~/code/dotfiles/.gitnore ~/
 ln -s code/dotfiles/.gitconfig ~/
 
+# Set up symbolic link of start work file
+
+sudo ln -s /Users/mikaelweiss/code/dotfiles/startwork.sh /usr/local/bin/sw
