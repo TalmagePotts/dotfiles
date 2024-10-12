@@ -27,6 +27,6 @@ return {
             },
         })
         vim.opt.laststatus = 3 -- Always show statusline
-        vim.opt.cmdheight = 0 -- Makes it so that command and lualine share the same line
+        vim.opt.cmdheight = 0  -- Makes it so that command and lualine share the same line
     end,
 }
