@@ -48,6 +48,9 @@ vim.keymap.set("n", "D", '"_D')
 vim.keymap.set({"n", "v"}, "s", '_s')
 vim.keymap.set({"n", "v"}, "S", '"_S')
 
+-- Don't yank when I paste inside of quotes --
+vim.keymap.set("x", "p", "\"_dP")
+
 -- Notes about shortcuts --
 -- <leader> is space
 -- <M-[> is alt + [

@@ -144,3 +144,4 @@ eval $(/opt/homebrew/bin/brew shellenv)
 # hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x7000000e7,"HIDKeyboardModifierMappingDst":0x700000029}]}'
 # launchctl load ~/Library/LaunchAgents/com.local.KeyRemapping.plist
 
+# export PATH="$PATH:/Users/mikaelweiss/Library/Python/3.9/bin"

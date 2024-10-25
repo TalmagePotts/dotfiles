@@ -13,7 +13,7 @@ return {
 
         local c = require('vscode.colors').get_colors()
         require('vscode').setup({
-            -- Alternatively set style in setup
+            -- Alternativly set style in setup
             -- style = 'light'
 
             -- Enable transparent background
