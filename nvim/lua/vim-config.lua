@@ -51,6 +51,8 @@ vim.keymap.set({"n", "v"}, "S", '"_S')
 -- Don't yank when I paste inside of quotes --
 vim.keymap.set("x", "p", "\"_dP")
 
+vim.keymap.set({"n", "v"}, "<leader>y", "\"+y") -- System Copy
+
 -- Notes about shortcuts --
 -- <leader> is space
 -- <M-[> is alt + [
