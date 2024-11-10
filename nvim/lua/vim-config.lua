@@ -53,12 +53,16 @@ vim.keymap.set("x", "p", "\"_dP")
 
 vim.keymap.set({"n", "v"}, "<leader>y", "\"+y") -- System Copy
 
+-- Command + s to save --
+
+vim.keymap.set({"n", "v"}, "<D-s>", ':w<CR>')
+
 -- Notes about shortcuts --
 -- <leader> is space
 -- <M-[> is alt + [
 -- <A-[> is alt + [
--- <D-[> is ctrl + [
--- <C-[> is cmd + [
+-- <D-[> is cmd + [
+-- <C-[> is ctrl + [
 --
 -- <CR> is enter
 -- <Esc> is escape
