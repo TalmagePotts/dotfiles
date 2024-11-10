@@ -145,3 +145,7 @@ eval $(/opt/homebrew/bin/brew shellenv)
 # launchctl load ~/Library/LaunchAgents/com.local.KeyRemapping.plist
 
 # export PATH="$PATH:/Users/mikaelweiss/Library/Python/3.9/bin"
+
+# Stuff for fly.io
+export FLYCTL_INSTALL="/Users/mikaelweiss/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"
