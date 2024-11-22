@@ -26,9 +26,6 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$
 
 # Link stuff from my dotfiles to the right locations
 
-symlink dotfiles/.zshrc
-symlink dotfiles/.gitnore
-
 mkdir .config
 ln -s ~/code/dotfiles/nvim ~/.config
 ln -s ~/code/dotfiles/.zshrc ~/
@@ -43,4 +40,4 @@ git config --global user.email campingmikael@icloud.com
 
 # Set up symbolic link of start work file
 
-sudo ln -s /Users/mikaelweiss/code/dotfiles/startwork.sh /usr/local/bin/sw
+# sudo ln -s /Users/mikaelweiss/code/dotfiles/startwork.sh /usr/local/bin/sw
