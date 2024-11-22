@@ -26,6 +26,7 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$
 
 # Link stuff from my dotfiles to the right locations
 
+cd
 mkdir .config
 ln -s ~/code/dotfiles/nvim ~/.config
 ln -s ~/code/dotfiles/.zshrc ~/
