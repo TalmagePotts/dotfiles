@@ -1,0 +1,9 @@
+# Alacritty configuration file
+
+[font]
+normal = { family = "MesloLGS NF", style = "Regular" }
+
+[window]
+opacity = 0.7
+blur = true
+

@@ -16,7 +16,7 @@ mv dotfiles code
 (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/mikaelweiss/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-brew install warp nvim arc figma notion cursor lazygit slack sf-symbols
+brew install nvim arc notion cursor lazygit slack sf-symbols powerlevel10k postgresql alacritty
 
 # Set up oh my zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -29,6 +29,7 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$
 cd
 mkdir .config
 ln -s ~/code/dotfiles/nvim ~/.config
+ln -s ~/code/dotfiles/alacritty ~/.config
 ln -s ~/code/dotfiles/.zshrc ~/
 ln -s ~/code/dotfiles/.p10k.zsh ~/
 ln -s ~/code/dotfiles/.gitnore ~/
