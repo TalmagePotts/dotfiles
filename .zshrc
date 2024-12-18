@@ -121,20 +121,19 @@ alias gstash='git stash'
 alias gsta='git stash apply'
 alias gst="git stash"
 alias gcm="git commit -m"
-alias m='git switch main'
-alias p='git pull'
 # alias gbc='git checkout -b $1 && git push -u origin $1'
 gbc() {
     git checkout -b $1 && git push -u origin $1
 }
 alias minecraftskins='open Library/Application\ Support/minecraft/assets/skins'
 alias minecraft='open Library/Application\ Support/minecraft'
-alias c='open ~/code/IntroToDatabases'
-alias d='cd ~/code/IntroToDatabases'
-alias h='cd'
-alias w='cd ~/code/work/lms'
+# alias w='cd ~/code/work/lms'
 alias opw='open ~/code/work/lms/lms.xcodeproj/'
 alias work='cd ~/code/work'
+
+# Alias for SSH
+alias raspberrypi='ssh raspberrypi'
+alias homepc='ssh homepc'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
