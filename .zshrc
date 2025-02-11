@@ -148,4 +148,3 @@ eval $(/opt/homebrew/bin/brew shellenv)
 # Stuff for fly.io
 export FLYCTL_INSTALL="/Users/mikaelweiss/.fly"
 export PATH="$FLYCTL_INSTALL/bin:$PATH"
-source ~/powerlevel10k/powerlevel10k.zsh-theme
