@@ -4,6 +4,8 @@ vim.g.mapleader = " "
 -- Add Line Numbers --
 vim.opt.nu = true
 
+-- Colors --
+
 -- Tabs --
 vim.opt.expandtab = true
 vim.opt.tabstop = 4
@@ -11,10 +13,9 @@ vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 
 -- Smartindent --
-smartindent = true
+vim.opt.smartindent = true
 
 -- Remaps --
-
 vim.keymap.set("v", "<D-<M-[>>", ":m '>+1<CR>gv=gv")
 vim.keymap.set("n", "¯", ":%s/>,/>,\\r/g<CR>")
 
@@ -42,20 +43,24 @@ vim.keymap.set("v", "<leader>w", "<Esc>:wqa<CR>")
 -- End of file --
 vim.opt.fillchars = { eob = " " }
 
--- Get rid of delete adding to register --
-vim.keymap.set("n", "dd", '"_dd')
-vim.keymap.set("n", "D", '"_D')
-vim.keymap.set({"n", "v"}, "s", '_s')
-vim.keymap.set({"n", "v"}, "S", '"_S')
-
 -- Don't yank when I paste inside of quotes --
 vim.keymap.set("x", "p", "\"_dP")
 
-vim.keymap.set({"n", "v"}, "<leader>y", "\"+y") -- System Copy
+-- System Copy --
+vim.keymap.set({"n", "v"}, "<leader>y", "\"+y")
 
 -- Command + s to save --
 
 vim.keymap.set({"n", "v"}, "<D-s>", ':w<CR>')
+
+-- Wrap Lines --
+vim.opt.wrap = true
+vim.opt.linebreak = true
+vim.opt.showbreak = '↪'
+
+-- GitHub Copilot --
+-- Not sure if this is working...
+vim.g.copilot_settings = { selectedCompletionModel = 'claude-3.7-sonnet' }
 
 -- Notes about shortcuts --
 -- <leader> is space

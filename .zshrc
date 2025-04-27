@@ -135,6 +135,9 @@ alias work='cd ~/code/work'
 alias raspberrypi='ssh raspberrypi'
 alias homepc='ssh homepc'
 
+# Alias for sourcing a python virtualenv
+alias venv='source .venv/bin/activate'
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
@@ -148,3 +151,5 @@ eval $(/opt/homebrew/bin/brew shellenv)
 # Stuff for fly.io
 export FLYCTL_INSTALL="/Users/mikaelweiss/.fly"
 export PATH="$FLYCTL_INSTALL/bin:$PATH"
+export PATH="$HOME/.cargo/env:$PATH"
+export PATH="/opt/homebrew/opt/ruby/bin:$PATH"

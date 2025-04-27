@@ -14,6 +14,7 @@
 	sw = switch
 	ch = checkout
 	branch-prune = "!git fetch -p && for b in $(git for-each-ref --format='%(if:equals=[gone])%(upstream:track)%(then)%(refname:short)%(end)' refs/heads); do git branch -d $b; done"
+	bb = !better-git-branch
 
 [init]
 	defaultBranch = main
@@ -33,3 +34,5 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[maintenance]
+	repo = /Users/mikaelweiss/code/strive
