@@ -17,6 +17,7 @@ mv dotfiles code
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 brew install nvim arc notion cursor claude chatgpt lazygit sf-symbols ghostty
+brew install raycast
 
 # set up p10k
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
@@ -39,7 +40,3 @@ ln -s ~/code/dotfiles/.gitconfig ~/
 git config --global core.excludesFile ~/.gitnore
 git config --global user.name Mikael\ Weiss
 git config --global user.email campingmikael@icloud.com
-
-# Set up symbolic link of start work file
-
-# sudo ln -s /Users/mikaelweiss/code/dotfiles/startwork.sh /usr/local/bin/sw
