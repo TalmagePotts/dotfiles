@@ -153,3 +153,6 @@ export FLYCTL_INSTALL="/Users/mikaelweiss/.fly"
 export PATH="$FLYCTL_INSTALL/bin:$PATH"
 export PATH="$HOME/.cargo/env:$PATH"
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+source $HOME/.local/bin/env
+
+. "$HOME/.local/bin/env"
