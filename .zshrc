@@ -116,12 +116,15 @@ alias opsh="open ~/code/work/sherpa/Sherpa.xcodeproj/"
 alias gdf="git diff --name-only"
 alias gstc=""
 alias lg='lazygit'
-alias gcl='git clean'
 alias gstash='git stash'
 alias gsta='git stash apply'
 alias gst="git stash"
 alias gcm="git commit -m"
 # alias gbc='git checkout -b $1 && git push -u origin $1'
+unalias gcl 2>/dev/null
+gcl() {
+    git clone https://github.com/mikaelweiss/$1
+}
 gbc() {
     git checkout -b $1 && git push -u origin $1
 }
@@ -138,6 +141,9 @@ alias homepc='ssh homepc'
 # Alias for sourcing a python virtualenv
 alias venv='source .venv/bin/activate'
 
+# Alias for icloud
+alias icloud='cd ~/Library/Mobile\ Documents/com\~apple\~CloudDocs'
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
@@ -153,6 +159,10 @@ export FLYCTL_INSTALL="/Users/mikaelweiss/.fly"
 export PATH="$FLYCTL_INSTALL/bin:$PATH"
 export PATH="$HOME/.cargo/env:$PATH"
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="$PATH:/path/to/elixir/bin"
 source $HOME/.local/bin/env
+export PATH=$HOME/flutter-sdk/flutter/bin:$PATH
+export PATH="$HOME/.local/bin:$PATH"
+export CLAUDE_APP_PATH="/opt/homebrew/bin/claude"
 
 . "$HOME/.local/bin/env"

@@ -6,3 +6,4 @@
 *.xcshareddata
 buildServer.json
 *.obsidian
+.venv
