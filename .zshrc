@@ -138,11 +138,10 @@ alias work='cd ~/code/work'
 alias raspberrypi='ssh raspberrypi'
 alias homepc='ssh homepc'
 
-# Alias for sourcing a python virtualenv
-alias venv='source .venv/bin/activate'
-
-# Alias for icloud
+# Random
 alias icloud='cd ~/Library/Mobile\ Documents/com\~apple\~CloudDocs'
+alias venv='source .venv/bin/activate'
+alias xc='sh ~/code/dotfiles/resize-xcode.sh'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
