@@ -107,11 +107,12 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias strive="cd ~/code/strive"
-alias s="cd ~/code/strive"
+alias strive="cd ~/code/Strive/strive"
+alias op='cd ~/code/tauri/open-chat'
+alias s="cd ~/code/Strive/strive"
 alias gs="git status"
 alias home="cd"
-alias ops="open ~/code/strive/Strive.xcodeproj/"
+alias ops="open ~/code/Strive/strive/Strive.xcodeproj/"
 alias opsh="open ~/code/work/sherpa/Sherpa.xcodeproj/"
 alias gdf="git diff --name-only"
 alias gstc=""
@@ -120,6 +121,7 @@ alias gstash='git stash'
 alias gsta='git stash apply'
 alias gst="git stash"
 alias gcm="git commit -m"
+alias gpm="git push origin HEAD:main"
 # alias gbc='git checkout -b $1 && git push -u origin $1'
 unalias gcl 2>/dev/null
 gcl() {
@@ -128,6 +130,32 @@ gcl() {
 gbc() {
     git checkout -b $1 && git push -u origin $1
 }
+gw() {
+    git worktree add -b "mikael/$1" ".worktrees/$1" && \
+    cd ".worktrees/$1" && \
+    git push -u origin "mikael/$1"
+}
+gwop() {
+    git worktree add -b "mikael/$1" ".worktrees/$1" && \
+    cd ".worktrees/$1" && \
+    git push -u origin "mikael/$1" && \
+    npm install && npm run build
+}
+# gw() {
+#     git worktree add -b "$1" ".worktrees/$1" origin/main && \
+#     cd ".worktrees/$1" && \
+#     git branch --set-upstream-to=origin/main
+# }
+# gwop() {
+#     git worktree add -b "$1" ".worktrees/$1" origin/main && \
+#     cd ".worktrees/$1" && \
+#     git branch --set-upstream-to=origin/main && \
+#     npm install && npm run build
+# }
+alias gcp='git checkpoint'
+alias gcpl='git listCheckpoints'
+alias gcpd='git deleteCheckpoint'
+alias gcpld='git loadCheckpoint'
 alias minecraftskins='open Library/Application\ Support/minecraft/assets/skins'
 alias minecraft='open Library/Application\ Support/minecraft'
 # alias w='cd ~/code/work/lms'
@@ -142,6 +170,8 @@ alias homepc='ssh homepc'
 alias icloud='cd ~/Library/Mobile\ Documents/com\~apple\~CloudDocs'
 alias venv='source .venv/bin/activate'
 alias xc='sh ~/code/dotfiles/resize-xcode.sh'
+alias st='pnpm tauri dev'
+alias sti='pnpm tauri ios dev "iPhone 16 Plus"'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -178,3 +208,23 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
+# Kiro setup
+if [[ "$TERM_PROGRAM" == "kiro" ]]; then
+    . "$(kiro --locate-shell-integration-path zsh)"
+fi
+
+# Pyenv setup
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+# opencode
+export PATH=/Users/mikaelweiss/.opencode/bin:$PATH
+export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+# Add npm global bin path
+export PATH="/opt/homebrew/Cellar/node/24.5.0/bin:$PATH"

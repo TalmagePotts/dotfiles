@@ -7,3 +7,5 @@
 buildServer.json
 *.obsidian
 .venv
+.worktrees
+.env
