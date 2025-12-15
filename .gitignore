@@ -1,3 +1,5 @@
+.worktrees
+opencode.json
 # ignore xcuser state
 *.xcuserstate
 *.xcuserdatad

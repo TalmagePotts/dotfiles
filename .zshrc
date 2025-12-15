@@ -6,17 +6,16 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
+# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
-# Path to your oh-my-zsh installation.
+# Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
+# load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-#ZSH_THEME="robbyrussell"
-ZSH_THEME="powerlevel10k/powerlevel10k"
+ZSH_THEME="robbyrussell"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -93,138 +92,62 @@ source $ZSH/oh-my-zsh.sh
 # if [[ -n $SSH_CONNECTION ]]; then
 #   export EDITOR='vim'
 # else
-#   export EDITOR='mvim'
+#   export EDITOR='nvim'
 # fi
 
 # Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+# export ARCHFLAGS="-arch $(uname -m)"
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# Set personal aliases, overriding those provided by Oh My Zsh libs,
+# plugins, and themes. Aliases can be placed here, though Oh My Zsh
+# users are encouraged to define aliases within a top-level file in
+# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
+# - $ZSH_CUSTOM/aliases.zsh
+# - $ZSH_CUSTOM/macos.zsh
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias strive="cd ~/code/Strive/strive"
-alias op='cd ~/code/tauri/open-chat'
-alias s="cd ~/code/Strive/strive"
-alias gs="git status"
-alias home="cd"
-alias ops="open ~/code/Strive/strive/Strive.xcodeproj/"
-alias opsh="open ~/code/work/sherpa/Sherpa.xcodeproj/"
-alias gdf="git diff --name-only"
-alias gstc=""
+
+export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/lib/ruby/gems/3.4.0/bin:$PATH"
 alias lg='lazygit'
-alias gstash='git stash'
-alias gsta='git stash apply'
-alias gst="git stash"
-alias gcm="git commit -m"
-alias gpm="git push origin HEAD:main"
-# alias gbc='git checkout -b $1 && git push -u origin $1'
-unalias gcl 2>/dev/null
-gcl() {
-    git clone https://github.com/mikaelweiss/$1
-}
-gbc() {
-    git checkout -b $1 && git push -u origin $1
-}
-gw() {
-    git worktree add -b "mikael/$1" ".worktrees/$1" && \
-    cd ".worktrees/$1" && \
-    git push -u origin "mikael/$1"
-}
-gwop() {
-    git worktree add -b "mikael/$1" ".worktrees/$1" && \
-    cd ".worktrees/$1" && \
-    git push -u origin "mikael/$1" && \
-    npm install && npm run build
-}
-# gw() {
-#     git worktree add -b "$1" ".worktrees/$1" origin/main && \
-#     cd ".worktrees/$1" && \
-#     git branch --set-upstream-to=origin/main
-# }
-# gwop() {
-#     git worktree add -b "$1" ".worktrees/$1" origin/main && \
-#     cd ".worktrees/$1" && \
-#     git branch --set-upstream-to=origin/main && \
-#     npm install && npm run build
-# }
-alias gcp='git checkpoint'
-alias gcpl='git listCheckpoints'
-alias gcpd='git deleteCheckpoint'
-alias gcpld='git loadCheckpoint'
-alias minecraftskins='open Library/Application\ Support/minecraft/assets/skins'
-alias minecraft='open Library/Application\ Support/minecraft'
-# alias w='cd ~/code/work/lms'
-alias opw='open ~/code/work/lms/lms.xcodeproj/'
-alias work='cd ~/code/work'
-
-# Alias for SSH
-alias raspberrypi='ssh raspberrypi'
-alias homepc='ssh homepc'
-
-# Random
-alias icloud='cd ~/Library/Mobile\ Documents/com\~apple\~CloudDocs'
-alias venv='source .venv/bin/activate'
-alias xc='sh ~/code/dotfiles/resize-xcode.sh'
+export PATH="$PATH:/Users/talmage/code/exfunct"
+alias dental_apps='cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Mysteries\ of\ God/dental_apps'
+alias mobcode='cd ~/iCloud/Mob_Code'
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+export PATH="$PATH:$HOME/.pub-cache/bin"
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+alias nst='npm run build && npm start'
 alias st='pnpm tauri dev'
-alias sti='pnpm tauri ios dev "iPhone 16 Plus"'
+alias cd=z
+export PATH=$HOME/.elixir-install/installs/otp/28.1/bin:$PATH
+export PATH=$HOME/.elixir-install/installs/elixir/1.19.0-otp-28/bin:$PATH
+
+gwd() {
+    git worktree add -b "$1" "../$1" origin/dev && \
+    cd "../$1" && \
+    git branch --set-upstream-to=origin/dev
+}
+
+gw() {
+    git worktree add -b "talmage/$1" ".worktrees/$1" && \
+    cd ".worktrees/$1" && \
+    git push -u origin "talmage/$1"
+}
+
+source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-eval $(/opt/homebrew/bin/brew shellenv)
-
-# hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x7000000e7,"HIDKeyboardModifierMappingDst":0x700000029}]}'
-# launchctl load ~/Library/LaunchAgents/com.local.KeyRemapping.plist
-
-# export PATH="$PATH:/Users/mikaelweiss/Library/Python/3.9/bin"
-
-# Stuff for fly.io
-export FLYCTL_INSTALL="/Users/mikaelweiss/.fly"
-export PATH="$FLYCTL_INSTALL/bin:$PATH"
-export PATH="$HOME/.cargo/env:$PATH"
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-export PATH="$PATH:/path/to/elixir/bin"
-source $HOME/.local/bin/env
-export PATH=$HOME/flutter-sdk/flutter/bin:$PATH
 export PATH="$HOME/.local/bin:$PATH"
-export CLAUDE_APP_PATH="/opt/homebrew/bin/claude"
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+eval "$(zoxide init zsh)"
 
-. "$HOME/.local/bin/env"
+export DATABASE_URL="postgresql://postgres.rkucrwspvqzbsmrufmyf:joDzup-bepzex-6dubwi@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/mikaelweiss/.lmstudio/bin"
-# End of LM Studio CLI section
-
-
-# pnpm
-export PNPM_HOME="/Users/mikaelweiss/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-
-# Kiro setup
-if [[ "$TERM_PROGRAM" == "kiro" ]]; then
-    . "$(kiro --locate-shell-integration-path zsh)"
-fi
-
-# Pyenv setup
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-# opencode
-export PATH=/Users/mikaelweiss/.opencode/bin:$PATH
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
-export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
-
-export PATH="$HOME/.local/bin:$PATH"
-
-# Add npm global bin path
-export PATH="/opt/homebrew/Cellar/node/24.5.0/bin:$PATH"
+export SUPABASE_ACCESS_TOKEN="sbp_6db09d1e0b53ad4b25247711a91aa854cd8f7a90"

@@ -29,13 +29,10 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-
 cd
 mkdir .config
 ln -s ~/code/dotfiles/nvim ~/.config
-ln -s ~/code/dotfiles/alacritty ~/.config
 ln -s ~/code/dotfiles/.zshrc ~/
 ln -s ~/code/dotfiles/.p10k.zsh ~/
-ln -s ~/code/dotfiles/.gitnore ~/
 ln -s ~/code/dotfiles/.gitconfig ~/
 
 # Set up github config
-git config --global core.excludesFile ~/.gitnore
-git config --global user.name Mikael\ Weiss
-git config --global user.email campingmikael@icloud.com
+git config --global user.name Talmage\ Potts
+git config --global user.email klavierplayer23@gmail.com
