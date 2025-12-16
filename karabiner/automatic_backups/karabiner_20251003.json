@@ -1,0 +1,32 @@
+{
+    "profiles": [
+        {
+            "devices": [
+                {
+                    "identifiers": {
+                        "is_game_pad": true,
+                        "product_id": 36896,
+                        "vendor_id": 11720
+                    },
+                    "ignore": false
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 36897,
+                        "vendor_id": 11720
+                    },
+                    "simple_modifications": [
+                        {
+                            "from": { "key_code": "d" },
+                            "to": [{ "key_code": "j" }]
+                        }
+                    ]
+                }
+            ],
+            "name": "Default profile",
+            "selected": true,
+            "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+        }
+    ]
+}
