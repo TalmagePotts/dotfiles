@@ -17,3 +17,4 @@ karabiner/automatic_backups/
 
 # Ignore Hammerspoon build artifacts
 hammerspoon/hs._asm.undocumented.spaces/obj_arm64/
+hammerspoon/hs._asm.undocumented.spaces

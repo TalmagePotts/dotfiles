@@ -137,6 +137,10 @@ gwd() {
 gw() {
     git worktree add -b "talmage/$1" ".worktrees/$1" && \
     cd ".worktrees/$1" && \
+    if [[ -f "../../.env" ]]; then
+        cp "../../.env" .env
+        echo "Copied .env to worktree"
+    fi && \
     git push -u origin "talmage/$1"
 }
 
