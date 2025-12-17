@@ -11,3 +11,9 @@ buildServer.json
 .venv
 .worktrees
 .env
+
+# Ignore Karabiner automatic backups
+karabiner/automatic_backups/
+
+# Ignore Hammerspoon build artifacts
+hammerspoon/hs._asm.undocumented.spaces/obj_arm64/
