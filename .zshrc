@@ -155,3 +155,9 @@ eval "$(zoxide init zsh)"
 export DATABASE_URL="postgresql://postgres.rkucrwspvqzbsmrufmyf:joDzup-bepzex-6dubwi@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 
 export SUPABASE_ACCESS_TOKEN="sbp_6db09d1e0b53ad4b25247711a91aa854cd8f7a90"
+
+alias nix-rebuild='sudo darwin-rebuild switch'
+alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'
+
+alias nix-rebuild='sudo darwin-rebuild switch'
+alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'
