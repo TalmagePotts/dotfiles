@@ -73,7 +73,7 @@
 
       programs.direnv = {
         enable = true;
-        silent = true;
+        # silent = true;
         nix-direnv.enable = true;
       };
 

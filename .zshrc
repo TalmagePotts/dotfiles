@@ -116,10 +116,6 @@ alias lg='lazygit'
 export PATH="$PATH:/Users/talmage/code/exfunct"
 alias dental_apps='cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Mysteries\ of\ God/dental_apps'
 alias mobcode='cd ~/iCloud/Mob_Code'
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
 export PATH="$PATH:$HOME/.pub-cache/bin"
 export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
 alias nst='npm run build && npm start'
@@ -155,9 +151,6 @@ eval "$(zoxide init zsh)"
 export DATABASE_URL="postgresql://postgres.rkucrwspvqzbsmrufmyf:joDzup-bepzex-6dubwi@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 
 export SUPABASE_ACCESS_TOKEN="sbp_6db09d1e0b53ad4b25247711a91aa854cd8f7a90"
-
-alias nix-rebuild='sudo darwin-rebuild switch'
-alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'
 
 alias nix-rebuild='sudo darwin-rebuild switch'
 alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'
