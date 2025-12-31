@@ -5,6 +5,22 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Fix Ghostty terminal (put this at the very top)
+if [[ "$TERM" == "xterm-ghostty" ]]; then
+  export TERM=xterm-256color
+fi
+
+# Source powerlevel10k
+source /run/current-system/sw/share/zsh/themes/powerlevel10k/powerlevel10k.zsh-theme
+
+# Source your p10k config if you have one
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+export PATH="$HOME/.npm-global/bin:$PATH"
+
+# Initialize zoxide
+eval "$(zoxide init zsh)"
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
@@ -79,7 +95,6 @@ ZSH_THEME="robbyrussell"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
-source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -110,19 +125,10 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-export PATH="/opt/homebrew/lib/ruby/gems/3.4.0/bin:$PATH"
 alias lg='lazygit'
-export PATH="$PATH:/Users/talmage/code/exfunct"
-alias dental_apps='cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Mysteries\ of\ God/dental_apps'
-alias mobcode='cd ~/iCloud/Mob_Code'
-export PATH="$PATH:$HOME/.pub-cache/bin"
-export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
 alias nst='npm run build && npm start'
 alias st='pnpm tauri dev'
 alias cd=z
-export PATH=$HOME/.elixir-install/installs/otp/28.1/bin:$PATH
-export PATH=$HOME/.elixir-install/installs/elixir/1.19.0-otp-28/bin:$PATH
 
 gwd() {
     git worktree add -b "$1" "../$1" origin/dev && \
@@ -140,17 +146,10 @@ gw() {
     git push -u origin "talmage/$1"
 }
 
-source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="$HOME/.local/bin:$PATH"
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-eval "$(zoxide init zsh)"
-
-export DATABASE_URL="postgresql://postgres.rkucrwspvqzbsmrufmyf:joDzup-bepzex-6dubwi@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
-
-export SUPABASE_ACCESS_TOKEN="sbp_6db09d1e0b53ad4b25247711a91aa854cd8f7a90"
+# eval "$(zoxide init zsh)"
 
 alias nix-rebuild='sudo darwin-rebuild switch'
 alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'
