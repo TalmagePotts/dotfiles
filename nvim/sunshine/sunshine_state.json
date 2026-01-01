@@ -1,0 +1,15 @@
+{
+    "username": "teapot",
+    "salt": "xuM9QmUQ)=XQFIbD",
+    "password": "F322086E83D8C682CA241BC763759F2C4F8D8C8AAF3DBF0608792C75454BC430",
+    "root": {
+        "uniqueid": "DE75B2B0-CDEF-E402-DA92-F3FB7BE80947",
+        "named_devices": [
+            {
+                "name": "ming",
+                "cert": "-----BEGIN CERTIFICATE-----\nMIICvzCCAaegAwIBAgIBADANBgkqhkiG9w0BAQsFADAjMSEwHwYDVQQDDBhOVklE\nSUEgR2FtZVN0cmVhbSBDbGllbnQwHhcNMjUxMjMxMTczOTQ0WhcNNDUxMjI2MTcz\nOTQ0WjAjMSEwHwYDVQQDDBhOVklESUEgR2FtZVN0cmVhbSBDbGllbnQwggEiMA0G\nCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKQZBp4h+cKJT13dn\/RROHfSxKwJih\nAfif+qhWqfhRTVPrwI3cebQ8FeNtqmm4D8yRhlfrpKQ3ebTE20Dc+BOaZpOMyJQC\nkmmPVe7vMbyTkIvmBXD0+wVRrX6z99rqfMQi8JtEwjx\/Q1Fen3dP6t5hGINFDRQ0\nnHmB0b\/m2eayYjqdLKain\/N2TcvjLiAiz1M\/GYURTFBfZloKnqF\/6NY2\/wTmypLd\nRrmtVIe314+5gX2q\/D9VQZTHwGdK80PwDZjHaRMMnuJCQFYyHNjbsU3XZ5L1oEsL\naEeL7jVlm6R+eq\/Zh4GQFqFsMamyDZ93mB\/Qwm5SBp3dqFVJWHb7Ku\/7AgMBAAEw\nDQYJKoZIhvcNAQELBQADggEBAERGx\/lHm0MAhNN0N8vdcwm1+ZQ5nLsturrIl0Kx\nlVwfWyqtUA4XF0pmv8pJ9XtvbOsbKnGOwlEwJFrGee1gYlmP6MdA+kZq34c43FKf\nsNkWD87Ot4K4UFDawgohpYGI3t8vt5JHlu34YKhelaDW5KeJJEry9U2WdknqH2CO\nORISJfqRLcbNrcabCthVvT1FqOTCrZvGWyiYJ7+6dhkQ3OWp+za8c9FD4P4FaSv\/\n4tmFCq8X67hg1ERwb944FE49c+Hgx6uJZGGPvbch05fZwrSXRKWHa2\/pYdjKNk6U\nXDiKgqEfyw511RYaF56xrgkvR9B+PqmiqRZM7+LRBn+m3xU=\n-----END CERTIFICATE-----\n",
+                "uuid": "19248D76-7E41-F204-F88C-1662C5AC1752"
+            }
+        ]
+    }
+}

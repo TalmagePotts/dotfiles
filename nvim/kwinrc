@@ -1,0 +1,10 @@
+[Desktops]
+Id_1=85fce58c-37ef-4de1-b6dc-1623bdeed8d2
+Number=1
+Rows=1
+
+[Tiling]
+padding=4
+
+[Tiling][9aada4f5-67a7-5dae-b03f-b55896a52f02]
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
