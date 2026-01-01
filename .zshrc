@@ -10,6 +10,10 @@ if [[ "$TERM" == "xterm-ghostty" ]]; then
   export TERM=xterm-256color
 fi
 
+autoload -Uz compinit && compinit
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' menu select
+
 # Source powerlevel10k
 source /run/current-system/sw/share/zsh/themes/powerlevel10k/powerlevel10k.zsh-theme
 
@@ -153,3 +157,5 @@ export PATH="$HOME/.local/bin:$PATH"
 
 alias nix-rebuild='sudo darwin-rebuild switch'
 alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'
+alias nrs='sudo nixos-rebuild switch'
+alias nc='nvim /etc/nixos/configuration.nix'
