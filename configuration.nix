@@ -18,6 +18,17 @@
   # Networking
   networking.hostName = "iris";
   networking.networkmanager.enable = true;
+  networking.firewall = {
+    allowedTCPPorts = [ 47984 47989 47990 48010 ];
+    allowedUDPPorts = [ 47998 47999 48000 48010 ];
+  };
+
+  # enable uinput for virtual input (allows remote keyboard/mouse)
+  boot.kernelModules = [ "uinput" ];
+
+  services.udev.extraRules = ''
+    KERNEL=="uinput", SUBSYSTEM=="misc", MODE="0660", GROUP="input"
+  '';
 
   # Locale and Time
   time.timeZone = "America/Boise";
@@ -40,6 +51,11 @@
 
   # Enable NVIDIA drivers
   services.xserver.videoDrivers = [ "nvidia" ];
+  services.xserver = {
+    enable = true;
+    displayManager.sddm.enable = true;
+    desktopManager.plasma6.enable = true;
+  };
 
   # Hardware Configuration
   hardware = {
@@ -86,7 +102,6 @@
   };
 
   # X Server with KDE Plasma
-  services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
@@ -94,7 +109,7 @@
   users.users.teapot = {
     isNormalUser = true;
     description = "Talmage Potts";
-    extraGroups = [ "wheel" "networkmanager" "docker" "audio" "video" ];
+    extraGroups = [ "wheel" "networkmanager" "docker" "audio" "video" "input" ];
     shell = pkgs.zsh;
   };
 
@@ -114,6 +129,7 @@
     htop
     btop
     tree
+    claude-code
 
     # Development Languages - Python
     python3
@@ -161,6 +177,7 @@
     # Minimal X utilities
     xorg.xinit
     xterm
+    sunshine # Streaming host
 
     # File managers
     ranger
@@ -168,6 +185,7 @@
 
     # Web browser
     firefox
+    brave
 
     # Nice-to-haves
     tmux          # Terminal multiplexer
@@ -228,6 +246,16 @@
     enable = true;
     useRoutingFeatures = "both";
     extraUpFlags = [ "--ssh" ];
+  };
+  
+  # Add this to your desktop's configuration.nix
+  systemd.user.services.sunshine = {
+    description = "Sunshine streaming server";
+    wantedBy = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.sunshine}/bin/sunshine";
+      Restart = "on-failure";
+    };
   };
 
   # Enable flakes and auto-optimization

@@ -158,4 +158,4 @@ export PATH="$HOME/.local/bin:$PATH"
 alias nix-rebuild='sudo darwin-rebuild switch'
 alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'
 alias nrs='sudo nixos-rebuild switch'
-alias nc='nvim /etc/nixos/configuration.nix'
+alias snc='sudo nvim /etc/nixos/configuration.nix'
