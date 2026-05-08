@@ -4,12 +4,17 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
+source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
@@ -111,18 +116,94 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-export PATH="/opt/homebrew/lib/ruby/gems/3.4.0/bin:$PATH"
+export PATH="$(gem env gemdir 2>/dev/null)/bin:$PATH"
 alias lg='lazygit'
-export PATH="$PATH:/Users/talmage/code/exfunct"
+export PATH="$PATH:$HOME/code/exfunct"
 alias dental_apps='cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Mysteries\ of\ God/dental_apps'
 alias mobcode='cd ~/iCloud/Mob_Code'
 export PATH="$PATH:$HOME/.pub-cache/bin"
 export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
 alias nst='npm run build && npm start'
 alias st='pnpm tauri dev'
+alias fix-safari='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
+
+# For zoxide
 alias cd=z
+alias tm="tmux new-session -A -s main"
+# Fuzzy find and search contents
+alias fs='rg --files --hidden --glob "!.git" | fzf --preview "bat --color=always {}"'
+# Search file contents interactively
+alias fsg='rg --line-number --color=always "" | fzf --ansi --preview "bat --color=always {1} --highlight-line {2}"'
+
+# Simple: fuzzy find from current directory
+alias ff='fd --type f | fzf --preview "bat --color=always {}"'
+
+# With directory: fuzzy find from specified directory
+ffd() {
+  fd --type f . "${1:-.}" | fzf --preview "bat --color=always {}"
+}
+
+# Fuzzy find with initial query
+ffq() {
+  local query="$1"
+  local dir="${2:-.}"
+  fd "$query" "$dir" | fzf --preview "bat --color=always {}"
+}
+
+# Search multiple school directories
+school() {
+  local query="${1:-}"
+  local dirs=(
+    ~/iCloud/School
+    ~/obsidian/School
+  )
+  
+  for dir in "${dirs[@]}"; do
+    [[ -d "$dir" ]] && fd "$query" "$dir"
+  done | fzf --preview "bat --color=always {}"
+}
+
+# elixir-install paths (update versions after reinstalling elixir-install on a new Mac)
 export PATH=$HOME/.elixir-install/installs/otp/28.1/bin:$PATH
 export PATH=$HOME/.elixir-install/installs/elixir/1.19.0-otp-28/bin:$PATH
+
+eval "$(atuin init zsh)"
+eval "$(zoxide init zsh)"
+
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@14/bin:$PATH"
+
+export CLAUDE_CODE_SUBAGENT_MODEL=claude-sonnet-4-6
+export API_TIMEOUT_MS='3000000'
+
+alias lg='lazygit'
+alias tm="tmux new-session -A -s main"
+alias cd=z
+alias nst='npm run build && npm start'
+alias st='pnpm tauri dev'
+alias fix-safari='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
+alias nix-switch='darwin-rebuild switch --flake $HOME/code/dotfiles/nix-darwin#talmage'
+alias nix-config='nvim $HOME/code/dotfiles/nix-darwin/flake.nix'
+alias inum='cd $HOME/code/Tutoring-Input/Input-Inumber && bun tauri dev'
+alias dental_apps='cd ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Mysteries\ of\ God/dental_apps'
+alias mobcode='cd ~/iCloud/Mob_Code'
+alias clau="unset ANTHROPIC_AUTH_TOKEN && unset ANTHROPIC_BASE_URL && claude"
+
+# Fuzzy find
+alias fs='rg --files --hidden --glob "!.git" | fzf --preview "bat --color=always {}"'
+alias fsg='rg --line-number --color=always "" | fzf --ansi --preview "bat --color=always {1} --highlight-line {2}"'
+alias ff='fd --type f | fzf --preview "bat --color=always {}"'
+
+ffd() { fd --type f . "${1:-.}" | fzf --preview "bat --color=always {}"; }
+ffq() { fd "$1" "${2:-.}" | fzf --preview "bat --color=always {}"; }
+
+school() {
+  local query="${1:-}"
+  local dirs=(~/iCloud/School ~/obsidian/School)
+  for dir in "${dirs[@]}"; do
+    [[ -d "$dir" ]] && fd "$query" "$dir"
+  done | fzf --preview "bat --color=always {}"
+}
 
 gwd() {
     git worktree add -b "$1" "../$1" origin/dev && \
@@ -140,17 +221,10 @@ gw() {
     git push -u origin "talmage/$1"
 }
 
-source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+# Load secrets from macOS Keychain (synced via iCloud, never stored in plaintext)
+_secret() { security find-generic-password -s "dotfiles" -a "$1" -w 2>/dev/null; }
+export DATABASE_URL="$(_secret DATABASE_URL)"
+export SUPABASE_ACCESS_TOKEN="$(_secret SUPABASE_ACCESS_TOKEN)"
+unset -f _secret
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-eval "$(zoxide init zsh)"
 
-export DATABASE_URL="postgresql://postgres.rkucrwspvqzbsmrufmyf:joDzup-bepzex-6dubwi@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
-
-export SUPABASE_ACCESS_TOKEN="sbp_6db09d1e0b53ad4b25247711a91aa854cd8f7a90"
-
-alias nix-rebuild='sudo darwin-rebuild switch'
-alias nix-config='nvim /Users/talmage/code/dotfiles/nix-darwin/flake.nix'

@@ -62,3 +62,8 @@ vim.keymap.set("n", "<leader>]", "<cmd>bnext<CR>", { desc = "Next buffer" })
 
 -- Exit terminal mode
 vim.keymap.set("t", "<D-Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+-- Open lazygit with cmd+g
+vim.keymap.set("n", "<D-g>", function()
+  Snacks.lazygit()
+end, { desc = "Open LazyGit" })

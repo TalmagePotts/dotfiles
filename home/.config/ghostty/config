@@ -1,0 +1,10 @@
+# Clipboard settings for OSC 52
+clipboard-read = allow
+clipboard-write = allow
+clipboard-paste-protection = false
+
+# Make sure shell integration isn't blocking OSC 52
+shell-integration = detect
+shell-integration-features = no-cursor,no-sudo,no-title
+
+scrollback-limit = 10000

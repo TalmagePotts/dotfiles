@@ -11,10 +11,49 @@ buildServer.json
 .venv
 .worktrees
 .env
+.nvim/xcodebuild
 
-# Ignore Karabiner automatic backups
-karabiner/automatic_backups/
+# tmux plugins (installed by TPM at runtime)
+home/.config/tmux/plugins/
 
-# Ignore Hammerspoon build artifacts
-hammerspoon/hs._asm.undocumented.spaces/obj_arm64/
-hammerspoon/hs._asm.undocumented.spaces
+# Karabiner automatic backups
+home/.config/karabiner/automatic_backups/
+
+# Hammerspoon build artifacts
+home/.hammerspoon/hs._asm.undocumented.spaces/obj_arm64/
+home/.hammerspoon/hs._asm.undocumented.spaces
+
+# Secrets file
+.secrets
+home/.secrets
+
+# SSH — never commit private keys
+home/.ssh/id_*
+home/.ssh/*.pem
+home/.ssh/known_hosts*
+
+# Claude Code — only settings.json and CLAUDE.md are tracked
+home/.claude/history.jsonl
+home/.claude/sessions/
+home/.claude/cache/
+home/.claude/backups/
+home/.claude/debug/
+home/.claude/projects/
+home/.claude/todos/
+home/.claude/stats-cache.json
+home/.claude/mcp-needs-auth-cache.json
+home/.claude/paste-cache/
+home/.claude/shell-snapshots/
+home/.claude/usage-data/
+home/.claude/statsig/
+home/.claude/telemetry/
+home/.claude/ide/
+home/.claude/chrome/
+home/.claude/agents/
+home/.claude/tasks/
+home/.claude/teams/
+home/.claude/plans/
+home/.claude/file-history/
+home/.claude/commands/
+home/.claude/plugins/
+home/.claude/session-env/

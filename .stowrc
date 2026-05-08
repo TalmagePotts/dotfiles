@@ -1,0 +1,5 @@
+--target=~
+--ignore='README\.md'
+--ignore='\.DS_Store'
+--ignore='nix-darwin'
+--ignore='\.claude'

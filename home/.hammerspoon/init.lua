@@ -1,3 +1,17 @@
+-- Caps Lock to Control
+local capsLockPressed = false
+hs.eventtap.new({ hs.eventtap.event.types.flagsChanged }, function(e)
+    if e:getKeyCode() == 57 then
+        local newCapsLockState = e:getFlags()["caps"]
+        if newCapsLockState ~= capsLockPressed then
+            capsLockPressed = newCapsLockState
+            hs.eventtap.event.newKeyEvent(hs.keycodes.map.ctrl, capsLockPressed):post()
+        end
+        return true
+    end
+    return false
+end):start()
+
 -- Open mission control shortcut-works with stickies
 
 -- This function brings an app to the foreground and triggers Mission Control
@@ -64,7 +78,57 @@ hs.hotkey.bind({"cmd"}, ";", simulateKeyPress("delete"), nil, simulateKeyPress("
 -- Bind Cmd+Shift+A to Enter
 hs.hotkey.bind({"cmd", "shift"}, "a", simulateKeyPress("return"), nil, simulateKeyPress("return"))
 
+-- Option+letter (top row) to numbers: Option+Q=1, Option+W=2, ..., Option+P=0
+local numberMap = {
+    q = "1", w = "2", e = "3", r = "4", t = "5",
+    y = "6", u = "7", i = "8", o = "9", p = "0"
+}
+
+for letter, number in pairs(numberMap) do
+    hs.hotkey.bind({"alt"}, letter, function()
+        hs.eventtap.keyStroke({}, number)
+    end)
+end
+
+-- Option+Shift+letter to symbols above numbers: Option+Shift+Q=!, Option+Shift+W=@, etc.
+local symbolMap = {
+    q = "1", w = "2", e = "3", r = "4", t = "5",
+    y = "6", u = "7", i = "8", o = "9", p = "0"
+}
+
+for letter, number in pairs(symbolMap) do
+    hs.hotkey.bind({"alt", "shift"}, letter, function()
+        hs.eventtap.keyStroke({"shift"}, number)
+    end)
+end
+
+-- Option+[ to hyphen
+hs.hotkey.bind({"alt"}, "[", function()
+    hs.eventtap.keyStroke({}, "-")
+end)
+
+-- Option+Shift+[ (Option+{) to em dash
+hs.hotkey.bind({"alt", "shift"}, "[", function()
+    hs.eventtap.keyStroke({}, "—")
+end)
+
 -- Hotkey to reload Hammerspoon config
 hs.hotkey.bind({"cmd", "ctrl", "shift"}, "R", function()
   hs.reload()
+end)
+
+local scriptsDir = os.getenv("HOME") .. "/code/exfunct/"
+
+local function runScript(name)
+  local result, success = hs.execute(scriptsDir .. name, true)
+  if success then
+    hs.alert.show("✓ " .. name .. " done")
+  else
+    hs.alert.show("✗ " .. name .. " failed")
+  end
+end
+
+hs.hotkey.bind({"cmd", "ctrl", "shift"}, "C", function()
+  local output, success, termType, rc = hs.execute(os.getenv("HOME") .. "/code/exfunct/runclipocr", true)
+  hs.alert.show("success: " .. tostring(success) .. "\n" .. output)
 end)
