@@ -4,7 +4,8 @@
 #   git clone https://github.com/YOURUSERNAME/dotfiles.git ~/code/dotfiles
 #   cd ~/code/dotfiles && chmod +x install.sh && ./install.sh
 
-set -e
+set -euo pipefail
+# Allow specific commands to fail without aborting (used with || true)
 
 DOTFILES="$HOME/code/dotfiles"
 GREEN='\033[0;32m'
@@ -39,7 +40,7 @@ fi
 
 # ── 4. Apps via Brewfile ─────────────────────────────────────────────────────
 step "Installing apps (this takes a while)..."
-brew bundle install --file="$DOTFILES/Brewfile"
+brew bundle install --file="$DOTFILES/Brewfile" || echo "  Some packages failed — re-run 'brew bundle install' after fixing network issues"
 
 # ── 4. Symlink dotfiles via stow ─────────────────────────────────────────────
 step "Linking dotfiles..."
@@ -55,11 +56,12 @@ ln -sf "$DOTFILES/home/.claude/CLAUDE.md"     ~/.claude/CLAUDE.md
 # ── 5. Tmux plugins via TPM ──────────────────────────────────────────────────
 step "Installing tmux plugins..."
 TPM_DIR="$HOME/.config/tmux/plugins/tpm"
+# Note: tmux.conf must use run '~/.config/tmux/plugins/tpm/tpm' to match this path
 if [ ! -d "$TPM_DIR" ]; then
   git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
 fi
 # Install all plugins non-interactively
-"$TPM_DIR/bin/install_plugins"
+"$TPM_DIR/bin/install_plugins" || echo "  TPM plugin install failed — open tmux and press prefix+I to install manually"
 
 # ── 7. Git identity ──────────────────────────────────────────────────────────
 step "Configuring git..."

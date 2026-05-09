@@ -63,6 +63,9 @@ cask "visual-studio-code"
 cask "whatpulse/whatpulse/whatpulse_chmodbpf" # Input tracker
 cask "zed"             # Code editor
 
+# Fonts
+cask "font-meslo-lg-nerd-font"  # Required for Powerlevel10k prompt
+
 # Mac App Store
 mas "Developer",            id: 640199958
 mas "NotesAI",              id: 6504924859
