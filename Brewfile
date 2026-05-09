@@ -12,14 +12,11 @@ brew "atuin"           # Shell history with sync
 brew "ccusage"         # Claude API cost tracker
 brew "cmake"           # Build system
 brew "direnv"          # Per-directory env vars
-brew "elixir"          # Elixir language
 brew "git-filter-repo" # Rewrite git history
 brew "git-lfs"         # Git large file storage
-brew "katago"          # Go game AI
 brew "mas"             # Mac App Store CLI
 brew "mole"            # SSH tunnel manager
 brew "neomutt"         # Terminal email client
-brew "ninja"           # Fast build system
 brew "nmap"            # Network scanner
 brew "node"            # Node.js
 brew "ocrmypdf"        # Add OCR to PDFs
@@ -32,36 +29,20 @@ brew "python@3.14"     # Python 3.14
 brew "tmux"            # Terminal multiplexer
 brew "w3m"             # Terminal web browser
 brew "xcode-build-server" # Xcode LSP support
-brew "anomalyco/tap/opencode" # OpenCode AI CLI
-brew "schpet/tap/linear"      # Linear CLI
 
 # GUI Apps
 cask "android-studio"  # Android development
 cask "arc"             # Browser
 cask "audacity"        # Audio editor
-cask "basictex"        # LaTeX (minimal)
-cask "chatgpt"         # ChatGPT desktop
-cask "claude"          # Claude desktop
 cask "codex"           # OpenAI Codex
 cask "cursor"          # AI code editor
-cask "flutter"         # Flutter SDK
 cask "ghostty"         # Terminal
-cask "github"          # GitHub Desktop
 cask "godot"           # Game engine
-cask "google-chrome"   # Chrome browser
 cask "hammerspoon"     # macOS automation
-cask "loom"            # Screen recorder
-cask "microsoft-onenote"
 cask "moonlight"       # Game streaming client
 cask "obsidian"        # Notes
-cask "parsec"          # Remote desktop
 cask "raycast"         # App launcher
-cask "retroarch"       # Emulator frontend
 cask "sf-symbols"      # Apple SF Symbols browser
-cask "steam"           # Gaming
-cask "visual-studio-code"
-cask "whatpulse/whatpulse/whatpulse_chmodbpf" # Input tracker
-cask "zed"             # Code editor
 
 # Fonts
 cask "font-meslo-lg-nerd-font"  # Required for Powerlevel10k prompt
