@@ -94,7 +94,6 @@
       "mcp__postgres__query"
     ],
     "deny": [
-      "Bash(git push:*)",
       "Bash(rm -rf:*)",
       "Read(.env)",
       "Read(.env.*)",
