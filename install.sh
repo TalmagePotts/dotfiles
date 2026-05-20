@@ -70,13 +70,24 @@ if [[ "$OS" == "mac" ]]; then
     warn "Some packages failed — re-run 'brew bundle install --file=~/code/dotfiles/Brewfile' after fixing issues"
   fi
 
+  # Symlink p10k into oh-my-zsh themes so ZSH_THEME="powerlevel10k/powerlevel10k" works
+  P10K_LINK="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+  if [[ -d /opt/homebrew/share/powerlevel10k && ! -e "$P10K_LINK" ]]; then
+    mkdir -p "$(dirname "$P10K_LINK")"
+    ln -sf /opt/homebrew/share/powerlevel10k "$P10K_LINK"
+    ok "Powerlevel10k linked into oh-my-zsh themes"
+  fi
+
 elif [[ "$OS" == "ubuntu" ]]; then
   step "Updating apt and installing core packages..."
   sudo apt-get update -qq
   sudo apt-get install -y \
+    bat \
     build-essential \
     curl \
     direnv \
+    fd-find \
+    fzf \
     git \
     git-filter-repo \
     git-lfs \
@@ -85,10 +96,58 @@ elif [[ "$OS" == "ubuntu" ]]; then
     postgresql \
     python3 \
     python3-pip \
+    ripgrep \
     stow \
     tmux \
+    zoxide \
     zsh
   ok "Core apt packages installed"
+
+  # bat is installed as 'batcat' and fd as 'fdfind' on Ubuntu — symlink to expected names
+  mkdir -p "$HOME/.local/bin"
+  [[ -f /usr/bin/batcat ]] && ln -sf /usr/bin/batcat "$HOME/.local/bin/bat"
+  [[ -f /usr/bin/fdfind ]] && ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
+  ok "bat and fd symlinked to ~/.local/bin"
+
+  # Neovim: apt version is outdated; install latest from GitHub releases
+  if ! command -v nvim &>/dev/null; then
+    step "Installing neovim..."
+    curl -Lo /tmp/nvim.tar.gz "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+    sudo tar -xf /tmp/nvim.tar.gz -C /opt/
+    sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+    rm /tmp/nvim.tar.gz
+    ok "neovim installed"
+  else
+    ok "neovim already installed: $(nvim --version | head -1)"
+  fi
+
+  # GitHub CLI
+  if ! command -v gh &>/dev/null; then
+    step "Installing GitHub CLI..."
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+      | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt-get update -qq && sudo apt-get install -y gh
+    ok "GitHub CLI installed"
+  else
+    ok "GitHub CLI already installed"
+  fi
+
+  # lazygit
+  if ! command -v lazygit &>/dev/null; then
+    step "Installing lazygit..."
+    LG_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
+      | grep -Po '"tag_name": "v\K[^"]*')
+    curl -Lo /tmp/lazygit.tar.gz \
+      "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LG_VERSION}_Linux_x86_64.tar.gz"
+    tar -xf /tmp/lazygit.tar.gz -C /tmp lazygit
+    sudo install /tmp/lazygit /usr/local/bin
+    rm /tmp/lazygit /tmp/lazygit.tar.gz
+    ok "lazygit installed"
+  else
+    ok "lazygit already installed"
+  fi
 
   # Atuin: use the official installer (not in apt)
   if ! command -v atuin &>/dev/null; then
@@ -97,6 +156,33 @@ elif [[ "$OS" == "ubuntu" ]]; then
     ok "atuin installed"
   else
     ok "atuin already installed"
+  fi
+
+  # pnpm
+  if ! command -v pnpm &>/dev/null; then
+    step "Installing pnpm..."
+    npm install -g pnpm
+    ok "pnpm installed"
+  else
+    ok "pnpm already installed"
+  fi
+
+  # bun
+  if ! command -v bun &>/dev/null; then
+    step "Installing bun..."
+    curl -fsSL https://bun.sh/install | bash
+    ok "bun installed"
+  else
+    ok "bun already installed"
+  fi
+
+  # rustup
+  if ! command -v rustup &>/dev/null; then
+    step "Installing rustup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    ok "rustup installed (stable toolchain included)"
+  else
+    ok "rustup already installed: $(rustup --version)"
   fi
 fi
 
@@ -196,6 +282,7 @@ elif [[ "$OS" == "ubuntu" ]]; then
   manual "Add SSH key to GitHub: cat ~/.ssh/id_ed25519.pub → github.com/settings/keys"
   manual "Add SSH key to each server: ssh-copy-id teapot@jarvis (iris, atlas, etc.)"
   manual "Install Tailscale: curl -fsSL https://tailscale.com/install.sh | sh"
+  manual "Rust stable is installed; add more toolchains: rustup target add <target>"
 fi
 manual "Run: gh auth login"
 manual "Run: atuin login"
