@@ -158,10 +158,10 @@ elif [[ "$OS" == "ubuntu" ]]; then
     ok "atuin already installed"
   fi
 
-  # pnpm
+  # pnpm (official installer avoids npm global permission issues)
   if ! command -v pnpm &>/dev/null; then
     step "Installing pnpm..."
-    npm install -g pnpm
+    curl -fsSL https://get.pnpm.io/install.sh | sh
     ok "pnpm installed"
   else
     ok "pnpm already installed"
@@ -216,11 +216,11 @@ mkdir -p ~/.claude
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 echo "  Running stow..."
-if stow -t ~ home --verbose 2>&1; then
-  ok "Stow completed"
-else
-  warn "Stow had conflicts — some files may already exist. Check output above."
-fi
+# --adopt moves existing files into the dotfiles repo, then git checkout restores the
+# committed versions — this handles pre-existing files like .gitconfig or .p10k.zsh
+stow --adopt -t ~ home --verbose 2>&1 || true
+git -C "$DOTFILES" checkout -- .
+ok "Stow completed"
 echo "  Symlinking .claude files..."
 ln -sfv "$DOTFILES/home/.claude/settings.json" ~/.claude/settings.json
 ln -sfv "$DOTFILES/home/.claude/CLAUDE.md"     ~/.claude/CLAUDE.md
@@ -232,15 +232,9 @@ TPM_DIR="$HOME/.config/tmux/plugins/tpm"
 if [ ! -d "$TPM_DIR" ]; then
   echo "  Cloning TPM into $TPM_DIR..."
   git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
-  ok "TPM cloned"
+  ok "TPM cloned — open tmux and press prefix+I to install plugins"
 else
-  ok "TPM already installed"
-fi
-echo "  Installing tmux plugins non-interactively..."
-if "$TPM_DIR/bin/install_plugins"; then
-  ok "Tmux plugins installed"
-else
-  warn "TPM plugin install failed — open tmux and press prefix+I to install manually"
+  ok "TPM already installed — open tmux and press prefix+I to install plugins"
 fi
 
 # ── 6. Git identity ──────────────────────────────────────────────────────────
