@@ -36,8 +36,14 @@ for pkg in "${PACKAGES[@]}"; do
     continue
   fi
 
-  while IFS= read -r -d '' src; do
-    rel="${src#"$pkgdir"/}"
+  # Enumerate TRACKED files only, via git rather than find. Runtime state lands
+  # inside package directories — TPM clones eleven tmux plugins into
+  # terminal/.config/tmux/plugins — and those are gitignored, not ours to link.
+  # Walking the filesystem counted them and buried the real signal under a
+  # thousand lines of noise.
+  while IFS= read -r -d '' relpath; do
+    src="$DOTFILES/$relpath"
+    rel="${relpath#"$pkg"/}"
     target="$HOME/$rel"
 
     # Files matching .stowrc's --ignore patterns are deliberately not linked.
@@ -72,7 +78,7 @@ for pkg in "${PACKAGES[@]}"; do
       fi
       (( copied++ ))
     fi
-  done < <(find "$pkgdir" -type f -print0)
+  done < <(git -C "$DOTFILES" ls-files -z -- "$pkg")
 done
 
 echo ""
