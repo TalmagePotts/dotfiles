@@ -165,7 +165,7 @@ elif [[ "$OS" == "ubuntu" ]]; then
   # Kept deliberately in sync with what actually runs on these machines.
   # pnpm/bun/postgresql were removed: they were aspirational and unused —
   # install them per-project instead.
-  run sudo apt-get install -y \
+  try "Core apt packages installed" sudo apt-get install -y \
     bat \
     build-essential \
     ca-certificates \
@@ -194,7 +194,6 @@ elif [[ "$OS" == "ubuntu" ]]; then
     unzip \
     zoxide \
     zsh
-  ok "Core apt packages installed"
 
   # bat is installed as 'batcat' and fd as 'fdfind' on Ubuntu — symlink to expected names
   run mkdir -p "$HOME/.local/bin"
@@ -236,8 +235,8 @@ elif [[ "$OS" == "ubuntu" ]]; then
   # ── Tailscale ─────────────────────────────────────────────────────────────
   if ! command -v tailscale &>/dev/null; then
     step "Installing Tailscale..."
-    run sh -c "curl -fsSL https://tailscale.com/install.sh | sh"
-    ok "Tailscale installed — run 'sudo tailscale up' to join your tailnet"
+    try "Tailscale installed — run 'sudo tailscale up' to join your tailnet" \
+      sh -c "curl -fsSL https://tailscale.com/install.sh | sh"
   else
     ok "Tailscale already installed"
   fi
@@ -291,8 +290,13 @@ elif [[ "$OS" == "ubuntu" ]]; then
   # Atuin: use the official installer (not in apt)
   if ! command -v atuin &>/dev/null; then
     step "Installing atuin..."
-    run sh -c "curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh"
-    ok "atuin installed"
+    # --non-interactive is required, not optional. Without it the installer
+    # probes for a terminal with `exec 3</dev/tty`; when there is no controlling
+    # terminal (ssh without -t, CI, any automated run) that redirection is a
+    # fatal error in a POSIX shell, so the script dies silently having installed
+    # nothing — and still exits 0. The flag skips the probe entirely.
+    try "atuin installed" \
+      sh -c "curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh -s -- --non-interactive"
   else
     ok "atuin already installed"
   fi
@@ -300,8 +304,7 @@ elif [[ "$OS" == "ubuntu" ]]; then
   # uv — Python package/venv manager
   if ! command -v uv &>/dev/null; then
     step "Installing uv..."
-    run sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"
-    ok "uv installed"
+    try "uv installed" sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"
   else
     ok "uv already installed"
   fi
@@ -309,8 +312,8 @@ elif [[ "$OS" == "ubuntu" ]]; then
   # rustup — also provides cargo, which installs worktrunk below
   if ! command -v rustup &>/dev/null; then
     step "Installing rustup..."
-    run sh -c "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
-    ok "rustup installed (stable toolchain included)"
+    try "rustup installed (stable toolchain included)" \
+      sh -c "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
   else
     ok "rustup already installed: $(rustup --version 2>/dev/null | head -1)"
   fi
@@ -320,16 +323,27 @@ fi
 step "Installing Claude Code and friends..."
 
 if ! command -v claude &>/dev/null; then
-  run sh -c "curl -fsSL https://claude.ai/install.sh | bash"
-  ok "Claude Code installed"
+  try "Claude Code installed" sh -c "curl -fsSL https://claude.ai/install.sh | bash"
 else
   ok "Claude Code already installed"
 fi
 
 # ccstatusline — referenced by the statusLine block in claude/.claude/settings.json
 if ! command -v ccstatusline &>/dev/null; then
-  run npm install -g ccstatusline
-  ok "ccstatusline installed"
+  # Point npm's global prefix at ~/.local so `npm install -g` does not need
+  # root. A stock Ubuntu npm writes to /usr/local/lib/node_modules, which fails
+  # with EACCES for a normal user; installing under sudo instead would leave
+  # root-owned files in the user's tree, which is worse.
+  if command -v npm &>/dev/null; then
+    NPM_PREFIX="$(npm config get prefix 2>/dev/null)"
+    if [[ "$NPM_PREFIX" != "$HOME"* ]]; then
+      run npm config set prefix "$HOME/.local"
+      ok "npm global prefix set to ~/.local (no sudo needed for -g installs)"
+    fi
+    try "ccstatusline installed" npm install -g ccstatusline
+  else
+    warn "npm not found — install ccstatusline later with: npm install -g ccstatusline"
+  fi
 else
   ok "ccstatusline already installed"
 fi
@@ -340,8 +354,7 @@ if ! command -v wt &>/dev/null; then
   # shellcheck disable=SC1091
   [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
   if command -v cargo &>/dev/null; then
-    run cargo install worktrunk
-    ok "worktrunk installed"
+    try "worktrunk installed" cargo install worktrunk
   else
     warn "cargo not on PATH — install worktrunk later with: cargo install worktrunk"
   fi
@@ -363,8 +376,8 @@ if [[ "$OS" == "ubuntu" ]]; then
   P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
   if [ ! -d "$P10K_DIR" ]; then
     step "Installing Powerlevel10k theme..."
-    run git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
-    ok "Powerlevel10k installed"
+    try "Powerlevel10k installed" \
+      git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
   else
     ok "Powerlevel10k already installed"
   fi
@@ -445,8 +458,7 @@ elif [[ "$OS" == "ubuntu" ]]; then
     else
       if ! dpkg -s xfce4 &>/dev/null; then
         echo "  Installing XFCE (started manually, not at boot)..."
-        run sudo apt-get install -y xfce4 xfce4-goodies lightdm
-        ok "XFCE installed"
+        try "XFCE installed" sudo apt-get install -y xfce4 xfce4-goodies lightdm
       else
         ok "XFCE already installed"
       fi
