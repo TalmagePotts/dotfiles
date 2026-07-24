@@ -1,0 +1,122 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "1",
+        "type": "model",
+        "color": "cyan",
+        "rawValue": true
+      },
+      {
+        "id": "2",
+        "type": "separator",
+        "color": "brightBlack"
+      },
+      {
+        "id": "3",
+        "type": "context-length",
+        "color": "brightBlack",
+        "rawValue": true
+      },
+      {
+        "id": "02f56ce8-94e1-4232-abfe-d575e7fdea8f",
+        "type": "separator",
+        "color": "brightBlack"
+      },
+      {
+        "id": "e4c20af1-7213-4452-971b-f8979a380859",
+        "type": "context-percentage",
+        "color": "brightBlack",
+        "rawValue": true
+      },
+      {
+        "id": "4852abc1-d3ad-4965-9259-ab6136c75111",
+        "type": "separator",
+        "color": "brightBlack"
+      },
+      {
+        "id": "da1651bd-827f-4d73-9d4c-14c02a74530b",
+        "type": "reset-timer",
+        "rawValue": true
+      },
+      {
+        "id": "4",
+        "type": "separator",
+        "color": "brightBlack"
+      },
+      {
+        "id": "5",
+        "type": "git-branch",
+        "color": "white"
+      },
+      {
+        "id": "6",
+        "type": "separator",
+        "color": "brightBlack"
+      },
+      {
+        "id": "7",
+        "type": "git-changes",
+        "color": "yellow"
+      }
+    ],
+    [
+      {
+        "id": "d6b166dd-2fa7-4acc-88b0-96456bb755cf",
+        "type": "session-cost",
+        "rawValue": true
+      },
+      {
+        "id": "714fd608-e3ec-4dee-ae04-7081906f001e",
+        "type": "separator"
+      },
+      {
+        "id": "2bbd37f8-e155-420d-966f-64f76d1d5998",
+        "type": "session-usage"
+      },
+      {
+        "id": "2ee6d6b7-aaf6-4af0-ae13-a44fa6d8bf8e",
+        "type": "separator"
+      },
+      {
+        "id": "15603062-91c2-4375-80d1-a46d05ced728",
+        "type": "weekly-usage"
+      },
+      {
+        "id": "5d80d4a3-2a04-4035-a476-9d4523cad2e9",
+        "type": "separator"
+      },
+      {
+        "id": "8f071bf8-264f-422c-9adf-55e77f6b6647",
+        "type": "weekly-reset-timer",
+        "rawValue": true
+      }
+    ],
+    []
+  ],
+  "flexMode": "full-minus-40",
+  "compactThreshold": 60,
+  "colorLevel": 2,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "gitCacheTtlSeconds": 5,
+  "minimalistMode": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false,
+    "continueThemeAcrossLines": false
+  },
+  "installation": {
+    "method": "auto-update",
+    "packageManager": "npm"
+  }
+}

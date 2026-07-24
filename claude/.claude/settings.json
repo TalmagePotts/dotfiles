@@ -98,27 +98,85 @@
       "Read(.env)",
       "Read(.env.*)",
       "Read(./secrets/**)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
       "Bash(rm:*)"
     ],
     "defaultMode": "default"
   },
+  "model": "claude-fable-5[1m]",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.local/bin/claude-notify '✅ Claude Finished' 'white_check_mark' \"Task complete — $(basename $(pwd))\""
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.local/bin/herdr-push-status done"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "MSG=$(echo \"$CLAUDE_NOTIFICATION_MESSAGE\" | head -c 200); $HOME/.local/bin/claude-notify '🔔 Claude Needs Input' 'bell' \"${MSG:-(no message)} — $(basename $(pwd))\""
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.local/bin/herdr-push-status needs-input"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.local/bin/herdr-push-status working"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "$HOME/.local/bin/ccstatusline",
+    "padding": 0,
+    "refreshInterval": 60
+  },
   "enabledPlugins": {
-    "swift-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "linear@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "linear@claude-plugins-official": false,
     "ralph-loop@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "worktrunk@worktrunk": true
+  },
+  "extraKnownMarketplaces": {
+    "worktrunk": {
+      "source": {
+        "source": "github",
+        "repo": "max-sixty/worktrunk"
+      }
+    }
   },
   "effortLevel": "medium",
+  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
-  "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-6",
-  "model": "sonnet"
+  "agentPushNotifEnabled": true,
+  "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-6"
 }

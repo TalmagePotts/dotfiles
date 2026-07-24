@@ -1,0 +1,32 @@
+# ~/.config/worktrunk/config.toml
+# User-level hooks — apply to every repo you run `wt` in (present and future),
+# unlike .config/wt.toml which only applies inside the one repo it's committed to.
+
+worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
+
+[pre-start]
+env = "test -f {{ repo_path }}/.envrc && cp {{ repo_path }}/.envrc {{ worktree_path }}/.env || true"
+
+[post-start]
+tmux = """
+S={{ branch | sanitize }}
+W={{ worktree_path }}
+tmux new-session -d -s "$S" -c "$W" "claude --dangerously-skip-permissions; exec zsh"
+if [ -n "$TMUX" ]; then
+  tmux switch-client -t "$S"
+fi
+"""
+
+[post-remove]
+tmux = """
+S={{ branch | sanitize }}
+if [ -n "$TMUX" ] && [ "$(tmux display-message -p '#S' 2>/dev/null)" = "$S" ]; then
+  tmux switch-client -t main 2>/dev/null || tmux switch-client -n 2>/dev/null || true
+fi
+tmux kill-session -t "$S" 2>/dev/null || true
+"""
+
+[projects]
+
+[commit.generation]
+command = "MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model=haiku --tools='' --safe-mode --setting-sources='user' --system-prompt=''"

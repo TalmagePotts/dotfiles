@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Send a Claude Code notification via ntfy.sh.
+#
+# The topic name is read from ~/.secrets (CLAUDE_NTFY_TOPIC) and deliberately
+# does not appear in this repo. An ntfy topic is an unauthenticated capability:
+# the name IS the credential. Anyone who learns it can subscribe to every
+# notification you receive — including the message text, which carries prompts
+# and working-directory names — and can push arbitrary alerts to your phone.
+# This repo is public, so the topic lives in an untracked file.
+#
+# Exits 0 in every case: a hook that fails must never block Claude Code.
+#
+# Usage: claude-notify <title> <tags> <message>
+
+[ -f "$HOME/.secrets" ] && . "$HOME/.secrets"
+
+# No topic configured on this machine — nothing to do, and that is not an error.
+[ -n "${CLAUDE_NTFY_TOPIC:-}" ] || exit 0
+
+curl -s --max-time 5 \
+  -H "Title: ${1:-Claude Code}" \
+  -H "Tags: ${2:-robot}" \
+  -d "${3:-(no message)}" \
+  "ntfy.sh/${CLAUDE_NTFY_TOPIC}" >/dev/null 2>&1 || true
+
+exit 0

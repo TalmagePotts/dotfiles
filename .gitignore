@@ -9,51 +9,66 @@ opencode.json
 buildServer.json
 *.obsidian
 .venv
-.worktrees
 .env
 .nvim/xcodebuild
 
 # tmux plugins (installed by TPM at runtime)
-home/.config/tmux/plugins/
+terminal/.config/tmux/plugins/
 
 # Karabiner automatic backups
-home/.config/karabiner/automatic_backups/
+mac/.config/karabiner/automatic_backups/
 
 # Hammerspoon build artifacts
-home/.hammerspoon/hs._asm.undocumented.spaces/obj_arm64/
-home/.hammerspoon/hs._asm.undocumented.spaces
+mac/.hammerspoon/hs._asm.undocumented.spaces/obj_arm64/
+mac/.hammerspoon/hs._asm.undocumented.spaces
+mac/.hammerspoon/hs/
 
-# Secrets file
+# Secrets — Linux reads ~/.secrets, macOS uses the Keychain
 .secrets
-home/.secrets
+terminal/.secrets
 
-# SSH — never commit private keys
-home/.ssh/id_*
-home/.ssh/*.pem
-home/.ssh/known_hosts*
+# Machine-local shell config. Deliberately per-machine and untracked;
+# ~/.zshrc sources it if present.
+.zshrc.local
+terminal/.zshrc.local
+
+# SSH — never commit private keys, or host entries with real addresses
+ssh/.ssh/id_*
+ssh/.ssh/*.pem
+ssh/.ssh/known_hosts*
+ssh/.ssh/config.local
+.ssh/config.local
+
+# ClipSync device registration. Contains a per-device auth token AND a device
+# identity — must never be shared between machines. `clipsyncd login` recreates
+# it on each new machine.
+clipsync/.config/clipsync/daemon.json
+
+# Atuin — the receipt is machine-local registration state, not config
+terminal/.config/atuin/atuin-receipt.json
 
 # Claude Code — only settings.json and CLAUDE.md are tracked
-home/.claude/history.jsonl
-home/.claude/sessions/
-home/.claude/cache/
-home/.claude/backups/
-home/.claude/debug/
-home/.claude/projects/
-home/.claude/todos/
-home/.claude/stats-cache.json
-home/.claude/mcp-needs-auth-cache.json
-home/.claude/paste-cache/
-home/.claude/shell-snapshots/
-home/.claude/usage-data/
-home/.claude/statsig/
-home/.claude/telemetry/
-home/.claude/ide/
-home/.claude/chrome/
-home/.claude/agents/
-home/.claude/tasks/
-home/.claude/teams/
-home/.claude/plans/
-home/.claude/file-history/
-home/.claude/commands/
-home/.claude/plugins/
-home/.claude/session-env/
+claude/.claude/history.jsonl
+claude/.claude/sessions/
+claude/.claude/cache/
+claude/.claude/backups/
+claude/.claude/debug/
+claude/.claude/projects/
+claude/.claude/todos/
+claude/.claude/stats-cache.json
+claude/.claude/mcp-needs-auth-cache.json
+claude/.claude/paste-cache/
+claude/.claude/shell-snapshots/
+claude/.claude/usage-data/
+claude/.claude/statsig/
+claude/.claude/telemetry/
+claude/.claude/ide/
+claude/.claude/chrome/
+claude/.claude/agents/
+claude/.claude/tasks/
+claude/.claude/teams/
+claude/.claude/plans/
+claude/.claude/file-history/
+claude/.claude/commands/
+claude/.claude/plugins/
+claude/.claude/session-env/

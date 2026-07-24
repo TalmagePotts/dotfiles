@@ -1,0 +1,27 @@
+[Unit]
+Description=ClipSync daemon — cross-device clipboard sync
+# ClipSync reads and writes the *desktop* clipboard, so it is useless without a
+# display. Binding it to graphical-session.target (rather than default.target)
+# means it starts when a desktop session comes up and stops when it goes away —
+# which matters on machines where the desktop is started on demand rather than
+# at boot. PartOf makes the stop half happen.
+After=graphical-session.target network-online.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# X11. For a Wayland session, replace the two Environment lines below with:
+#   Environment=WAYLAND_DISPLAY=wayland-0
+#   Environment=XDG_RUNTIME_DIR=%t
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+ExecStart=%h/.local/bin/clipsyncd run --mirror latest-text
+Restart=on-failure
+RestartSec=5s
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=clipsyncd
+
+[Install]
+WantedBy=graphical-session.target
