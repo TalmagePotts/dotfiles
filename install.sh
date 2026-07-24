@@ -67,6 +67,40 @@ try() {
   fi
 }
 
+# setup_intel_vaapi: enable hardware video decode on an Intel iGPU.
+#
+# Worth doing on any box that will drive a screen: it moves H.264/HEVC/VP9
+# decoding off the CPU, which is the difference between smooth 4K YouTube and a
+# pegged processor. Runs only when an Intel display device is actually present,
+# so it is a no-op on machines without one.
+#
+# Note this is deliberately Intel-only. A machine can have a discrete card that
+# is useless for this — an old NVIDIA Kepler card, say, has no VP9 decode at all
+# and no supported driver on current Ubuntu, while the Intel iGPU beside it does
+# everything needed. Check which GPU actually owns the HDMI port before assuming
+# the discrete card is the better one.
+setup_intel_vaapi() {
+  command -v lspci &>/dev/null || return 0
+  if ! lspci -nn 2>/dev/null | grep -iE "vga|3d|display" | grep -qi intel; then
+    skip "No Intel GPU detected — skipping VA-API setup"
+    return 0
+  fi
+
+  step "Enabling Intel hardware video decode (VA-API)..."
+  try "VA-API drivers installed" \
+    sudo apt-get install -y intel-media-va-driver-non-free vainfo
+
+  # Access to /dev/dri/renderD* is granted to the active seat by logind ACLs,
+  # which covers a graphical login — but not headless use over ssh (ffmpeg
+  # transcodes, container workloads). Group membership covers both.
+  if ! id -nG "$USER_NAME" | tr ' ' '\n' | grep -qx render; then
+    try "Added $USER_NAME to render/video groups" \
+      sudo usermod -aG render,video "$USER_NAME"
+  else
+    ok "$USER_NAME already in the render group"
+  fi
+}
+
 usage() { sed -n '2,23p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0; }
 
 # ── Parse arguments ──────────────────────────────────────────────────────────
@@ -405,10 +439,28 @@ ok "Dotfiles linked"
 step "Installing tmux plugins..."
 TPM_DIR="$HOME/.config/tmux/plugins/tpm"
 if [ ! -d "$TPM_DIR" ]; then
-  run git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
-  ok "TPM cloned — open tmux and press prefix+I to install plugins"
+  try "TPM cloned" git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
 else
-  ok "TPM already installed — open tmux and press prefix+I to install plugins"
+  ok "TPM already installed"
+fi
+
+# Actually install the plugins rather than telling the user to press prefix+I.
+# tmux.conf pulls in catppuccin, sessionx, floax and friends; until those exist
+# tmux comes up completely unstyled, which looks exactly like "the config didn't
+# load". TPM ships a non-interactive installer, but it reads plugin declarations
+# from a running server, so start a throwaway session first.
+if [ -d "$TPM_DIR/bin" ] && command -v tmux &>/dev/null; then
+  if (( DRY_RUN )); then
+    echo -e "  ${BLUE}[dry-run]${NC} $TPM_DIR/bin/install_plugins"
+  else
+    tmux new-session -d -s _tpm_install 2>/dev/null || true
+    if "$TPM_DIR/bin/install_plugins" >/dev/null 2>&1; then
+      ok "tmux plugins installed ($(find "$HOME/.config/tmux/plugins" -maxdepth 1 -mindepth 1 -type d | wc -l) total)"
+    else
+      warn "Some tmux plugins failed — open tmux and press prefix+I to retry"
+    fi
+    tmux kill-session -t _tpm_install 2>/dev/null || true
+  fi
 fi
 
 # ── 7. Git identity ──────────────────────────────────────────────────────────
@@ -462,6 +514,7 @@ elif [[ "$OS" == "ubuntu" ]]; then
       else
         ok "XFCE already installed"
       fi
+      setup_intel_vaapi
     fi
 
     # Boot to a text console. The desktop becomes something you start, not
@@ -510,6 +563,7 @@ EOF
   elif [[ "$ROLE" == "workstation" ]]; then
     step "Desktop policy (workstation role)..."
     ok "Leaving boot target as-is ($(systemctl get-default))"
+    setup_intel_vaapi
   fi
 
   # ── ClipSync ──────────────────────────────────────────────────────────────
