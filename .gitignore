@@ -82,3 +82,4 @@ services/frigate/media/
 services/frigate/config/*.db
 services/frigate/config/*.db-*
 services/frigate/config/model_cache/
+services/frigate/config/backup_config.yaml
