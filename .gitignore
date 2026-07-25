@@ -83,3 +83,8 @@ services/frigate/config/*.db
 services/frigate/config/*.db-*
 services/frigate/config/model_cache/
 services/frigate/config/backup_config.yaml
+
+# Mosquitto — broker credentials and runtime state
+services/mosquitto/config/passwd
+services/mosquitto/data/
+services/mosquitto/log/

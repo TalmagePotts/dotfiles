@@ -1,0 +1,22 @@
+# Mosquitto MQTT broker.
+#
+# Exists because the Frigate <-> Home Assistant integration requires one: HA
+# subscribes to the state Frigate publishes. Nothing else here uses MQTT.
+#
+# Deploy: docker compose up -d
+
+services:
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+
+    # Host networking so Home Assistant — which also runs on the host network —
+    # reaches the broker at 127.0.0.1:1883. Frigate runs on a bridge network and
+    # reaches it via host.docker.internal (see the Frigate compose file).
+    network_mode: host
+
+    volumes:
+      - ./config:/mosquitto/config
+      - ./data:/mosquitto/data
+      - ./log:/mosquitto/log
