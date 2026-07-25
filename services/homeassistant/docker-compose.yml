@@ -1,0 +1,45 @@
+# Home Assistant — container deployment.
+#
+# Deploy:  docker compose up -d
+# Logs:    docker compose logs -f
+# Update:  docker compose pull && docker compose up -d
+# UI:      http://<host-ip>:8123
+#
+# See README.md in this directory for the full runbook.
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: unless-stopped
+
+    # host networking is REQUIRED, not a convenience.
+    #
+    # Home Assistant finds smart plugs, cameras and most other devices with
+    # mDNS/zeroconf, SSDP and DHCP-based discovery. All three rely on broadcast
+    # and multicast traffic, none of which crosses Docker's default bridge NAT.
+    # On a bridge network HA starts fine and then simply never sees your
+    # devices — which looks like the devices being broken rather than a
+    # networking choice. Host mode puts HA directly on the LAN (192.168.0.0/24
+    # here), same broadcast domain as the plugs and camera.
+    #
+    # Consequence: port 8123 is bound on the host directly, so the `ports:` key
+    # is neither needed nor allowed here.
+    network_mode: host
+
+    privileged: true
+
+    volumes:
+      # Persistent config. Everything you configure in the UI lives here —
+      # this directory IS your Home Assistant instance. Back it up.
+      - ./config:/config
+      # Let the container see the host clock/timezone rather than drifting to UTC.
+      - /etc/localtime:/etc/localtime:ro
+      # D-Bus gives HA access to host Bluetooth, used by many sensors and some
+      # smart plugs for setup. Harmless when no Bluetooth adapter is present.
+      - /run/dbus:/run/dbus:ro
+
+    environment:
+      # Must match the host, or every automation that runs "at sunset" or
+      # "at 7am" fires at the wrong time.
+      - TZ=America/Boise

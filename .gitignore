@@ -72,3 +72,6 @@ claude/.claude/file-history/
 claude/.claude/commands/
 claude/.claude/plugins/
 claude/.claude/session-env/
+
+# Home Assistant instance data — credentials, device tokens, state database
+services/homeassistant/config/
