@@ -12,17 +12,25 @@ mqtt:
   # Turn this on only if you later want Frigate to publish to an MQTT broker.
   enabled: false
 
-# Uncomment to calibrate the audio thresholds. At debug level Frigate logs the
-# confidence score for EVERY sound it classifies, including ones below the
-# threshold — which is the only way to see the score of a cry that failed to
-# trigger. Watch it through a few real cries, then set the threshold just below
-# the scores you see. Comment it out again afterwards; it is noisy.
+# Audio calibration logging. Frigate logs a line per classified sound —
+#   "nursery heard <label> with a score of <score>"
+# — for every label, BEFORE the listen/threshold filters. That is the only way
+# to see the score of a cry that failed to trigger, so it is the tool for
+# picking thresholds. Watch it through a few real cries, set the thresholds
+# just below the scores observed, then comment this out; it is noisy.
 #
-#   docker compose logs -f | grep -i audio
+#   docker compose logs -f | grep heard
 #
+# NOTE the logger is camera-scoped: `audio.<camera_name>`, NOT
+# `frigate.events.audio` (the module path). The module name silently produces
+# no output at all.
+#
+# Floor: the detector discards anything below AUDIO_MIN_CONFIDENCE = 0.5
+# (frigate/const.py), so scores under 0.5 never appear here and a threshold
+# below 0.5 has no effect.
 logger:
   logs:
-    frigate.events.audio: debug
+    audio.nursery: debug
 
 ffmpeg:
   # Intel VA-API hardware decode. Keeps a 24/7 stream off the CPU.
@@ -113,9 +121,12 @@ cameras:
       # fires, while every dashboard still looks healthy. Measure this on any
       # new camera rather than trusting the default.
       #
-      # Set just above the room's silent baseline so real sound always gets
-      # classified, and let the confidence thresholds above do the filtering.
-      min_volume: 10
+      # Set BELOW the silent baseline so the model always runs and nothing is
+      # missed, letting the confidence thresholds do the filtering. Verified on
+      # this camera: at 1 the model runs roughly every 9s and correctly reports
+      # `silence` in an empty room — negligible CPU for one camera, and no risk
+      # of a quiet cry falling under the gate.
+      min_volume: 1
 
 # Frigate needs at least one detector defined even when object detection is off.
 detectors:
