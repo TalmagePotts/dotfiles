@@ -39,5 +39,10 @@ services:
       - "8555:8555/tcp"
       - "8555:8555/udp"
 
+    # Frigate is on a bridge network; the MQTT broker is host-networked.
+    # This maps host.docker.internal to the host gateway so it can reach it.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
     env_file:
       - .env

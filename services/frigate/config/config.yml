@@ -7,10 +7,18 @@
 #
 # Object detection is OFF on purpose — see the `detect` block below.
 
+# Required by the Home Assistant integration, which is MQTT-based: Frigate
+# publishes events here and HA subscribes. Without it the HA integration loads
+# but no entity ever updates, which reads as a broken integration rather than a
+# missing broker.
+# host.docker.internal resolves to the host gateway (mapped in the compose
+# file); the broker runs host-networked alongside Home Assistant.
 mqtt:
-  # Not needed: the Home Assistant Frigate integration talks over HTTP.
-  # Turn this on only if you later want Frigate to publish to an MQTT broker.
-  enabled: false
+  enabled: true
+  host: host.docker.internal
+  port: 1883
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
 
 # Audio calibration logging. Frigate logs a line per classified sound —
 #   "nursery heard <label> with a score of <score>"
@@ -58,6 +66,20 @@ cameras:
             - record
             - audio
             - detect
+
+    # Pan/tilt control. The E1 Pro is a PTZ camera and exposes ONVIF on port
+    # 8000. This surfaces movement controls in both the Frigate UI and Home
+    # Assistant.
+    #
+    # NOTE the password here is the RAW value, not the URL-encoded one used in
+    # the go2rtc RTSP URL above — this is not a URL, so encoding it would send
+    # a literal "%3F" as part of the password and authentication would fail
+    # with a confusing "unauthorized".
+    onvif:
+      host: "{FRIGATE_CAM_HOST}"
+      port: 8000
+      user: "{FRIGATE_CAM_USER}"
+      password: "{FRIGATE_CAM_PASSWORD_RAW}"
 
     detect:
       # Object detection (person/car/dog) is disabled. You said you don't need
