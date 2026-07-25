@@ -41,5 +41,6 @@ services:
 
     environment:
       # Must match the host, or every automation that runs "at sunset" or
-      # "at 7am" fires at the wrong time.
-      - TZ=America/Boise
+      # "at 7am" fires at the wrong time. Override per-machine by putting
+      # TZ=<zone> in a .env file beside this compose file.
+      - TZ=${TZ:-America/New_York}
