@@ -20,9 +20,9 @@ mqtt:
 #
 #   docker compose logs -f | grep -i audio
 #
-# logger:
-#   logs:
-#     frigate.events.audio: debug
+logger:
+  logs:
+    frigate.events.audio: debug
 
 ffmpeg:
   # Intel VA-API hardware decode. Keeps a 24/7 stream off the CPU.
@@ -104,11 +104,18 @@ cameras:
           # adult speech, so a low threshold here fires every time someone
           # talks near the camera.
           threshold: 0.7
-      # RMS level below which audio detection does not even run. Stops the model
-      # burning CPU on a silent room, and avoids classifying background hiss.
-      # Raise if a quiet room keeps triggering; lower if cries from across the
-      # room are missed.
-      min_volume: 500
+      # RMS gate: below this, the audio model does not run at all.
+      #
+      # Frigate's default is 500, which is WRONG for this camera by two orders
+      # of magnitude — the Reolink mic reports RMS of roughly 0.5-5 in a quiet
+      # room (check live values at /api/stats -> cameras.nursery.audio_rms).
+      # Left at 500 the model never runs and cry detection silently never
+      # fires, while every dashboard still looks healthy. Measure this on any
+      # new camera rather than trusting the default.
+      #
+      # Set just above the room's silent baseline so real sound always gets
+      # classified, and let the confidence thresholds above do the filtering.
+      min_volume: 10
 
 # Frigate needs at least one detector defined even when object detection is off.
 detectors:
