@@ -23,3 +23,15 @@ docker compose restart
 
 Anonymous access is off: the broker listens on the LAN, so anonymous would let
 anything on the network read camera events and publish forged ones.
+
+## File ownership gotcha
+
+Mosquitto runs as uid **1883** inside the container. A password file created on
+the host as your own user with `chmod 600` is unreadable to it, and the broker
+exits with `Unable to open pwfile` then restart-loops. After generating
+credentials:
+
+```sh
+sudo chown 1883:1883 config/passwd data log
+sudo chmod 600 config/passwd
+```
