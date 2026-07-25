@@ -12,6 +12,18 @@ mqtt:
   # Turn this on only if you later want Frigate to publish to an MQTT broker.
   enabled: false
 
+# Uncomment to calibrate the audio thresholds. At debug level Frigate logs the
+# confidence score for EVERY sound it classifies, including ones below the
+# threshold — which is the only way to see the score of a cry that failed to
+# trigger. Watch it through a few real cries, then set the threshold just below
+# the scores you see. Comment it out again afterwards; it is noisy.
+#
+#   docker compose logs -f | grep -i audio
+#
+# logger:
+#   logs:
+#     frigate.events.audio: debug
+
 ffmpeg:
   # Intel VA-API hardware decode. Keeps a 24/7 stream off the CPU.
   hwaccel_args: preset-vaapi
@@ -67,17 +79,35 @@ cameras:
 
     audio:
       enabled: true
-      # From YAMNet's ~500 sound classes. `crying` covers crying and sobbing.
+      # Labels come from YAMNet's fixed 521-class list (/audio-labelmap.txt in
+      # the container). The model CANNOT be retrained — Frigate 0.17's custom
+      # classification is visual only. Accuracy is improved by tuning the
+      # thresholds below, not by feeding it examples.
+      #
+      # `crying` collapses three YAMNet classes — baby cry, whimper, and
+      # crying/sobbing — so soft whimpering is already covered.
+      # `babbling` is the earlier signal: cooing and gurgling on waking, before
+      # any crying starts. It answers "is the baby awake" rather than "is the
+      # baby upset".
       listen:
         - crying
+        - babbling
       filters:
         crying:
           # Confidence needed to fire. Lower catches more but false-alarms on
-          # similar sounds; higher is quieter but may miss a soft cry. 0.6 is a
-          # starting point — tune it against real recordings, don't guess.
+          # similar sounds; higher is quieter but may miss a soft cry.
+          # These are starting points — calibrate against real recordings using
+          # the debug logger below, don't guess.
           threshold: 0.6
+        babbling:
+          # Higher than crying on purpose: babbling sits acoustically close to
+          # adult speech, so a low threshold here fires every time someone
+          # talks near the camera.
+          threshold: 0.7
       # RMS level below which audio detection does not even run. Stops the model
       # burning CPU on a silent room, and avoids classifying background hiss.
+      # Raise if a quiet room keeps triggering; lower if cries from across the
+      # room are missed.
       min_volume: 500
 
 # Frigate needs at least one detector defined even when object detection is off.
