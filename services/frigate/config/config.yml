@@ -1,0 +1,88 @@
+# Frigate configuration — nursery camera.
+#
+# Goals for this instance:
+#   1. Continuous recording so you can scrub back through the timeline
+#   2. Audio detection for crying, which raises an event you can alert on
+#   3. Live view in Home Assistant
+#
+# Object detection is OFF on purpose — see the `detect` block below.
+
+mqtt:
+  # Not needed: the Home Assistant Frigate integration talks over HTTP.
+  # Turn this on only if you later want Frigate to publish to an MQTT broker.
+  enabled: false
+
+ffmpeg:
+  # Intel VA-API hardware decode. Keeps a 24/7 stream off the CPU.
+  hwaccel_args: preset-vaapi
+
+# go2rtc pulls ONE connection from the camera and fans it out to recording,
+# audio detection and live view. Cheap cameras have a hard limit on simultaneous
+# RTSP clients — without this, the third consumer gets refused and the symptom
+# looks like a flaky camera rather than a connection limit.
+go2rtc:
+  streams:
+    nursery:
+      - "rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM_HOST}:554/h264Preview_01_main"
+
+cameras:
+  nursery:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/nursery
+          # This preset is what carries the audio track through to the audio
+          # detector. Audio detection silently does nothing without it.
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - audio
+            - detect
+
+    detect:
+      # Object detection (person/car/dog) is disabled. You said you don't need
+      # it, and running it on CPU 24/7 costs far more than the audio model does.
+      # Flip to true if you ever want person alerts; no other change needed.
+      enabled: false
+      width: 640
+      height: 480
+      fps: 5
+
+    record:
+      enabled: true
+      continuous:
+        # How far back the timeline scrubs. 1 day at ~1-2 Mbps is roughly
+        # 10-20GB — comfortable on this disk. For "just the last hour" use
+        # 0.042; for a weekend, 3. Change and `docker compose restart frigate`.
+        days: 1
+      # Keep clips around a detected event for longer than the rolling buffer,
+      # so a cry from last week is still there after the continuous footage
+      # has rolled off.
+      alerts:
+        retain:
+          days: 14
+      detections:
+        retain:
+          days: 14
+
+    audio:
+      enabled: true
+      # From YAMNet's ~500 sound classes. `crying` covers crying and sobbing.
+      listen:
+        - crying
+      filters:
+        crying:
+          # Confidence needed to fire. Lower catches more but false-alarms on
+          # similar sounds; higher is quieter but may miss a soft cry. 0.6 is a
+          # starting point — tune it against real recordings, don't guess.
+          threshold: 0.6
+      # RMS level below which audio detection does not even run. Stops the model
+      # burning CPU on a silent room, and avoids classifying background hiss.
+      min_volume: 500
+
+# Frigate needs at least one detector defined even when object detection is off.
+detectors:
+  cpu1:
+    type: cpu
+
+version: 0.16-0

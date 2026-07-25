@@ -75,3 +75,10 @@ claude/.claude/session-env/
 
 # Home Assistant instance data — credentials, device tokens, state database
 services/homeassistant/config/
+
+# Frigate — camera credentials, recordings, and runtime database
+services/frigate/.env
+services/frigate/media/
+services/frigate/config/*.db
+services/frigate/config/*.db-*
+services/frigate/config/model_cache/

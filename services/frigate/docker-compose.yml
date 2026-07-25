@@ -1,0 +1,43 @@
+# Frigate NVR — local recording, scrub-back timeline, and audio (cry) detection.
+#
+# Deploy:  docker compose up -d      (fill in .env first — see README.md)
+# UI:      http://<host-ip>:5000
+#
+# Camera credentials come from .env, which is gitignored.
+
+services:
+  frigate:
+    container_name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
+    restart: unless-stopped
+
+    # Frigate keeps decoded frames in shared memory. The 64MB Docker default is
+    # too small and shows up as cryptic "Bus error" crashes rather than an
+    # honest out-of-memory message.
+    shm_size: "256mb"
+
+    devices:
+      # Intel iGPU for hardware-accelerated video decode. Without this, decoding
+      # a 24/7 stream is pure CPU. renderD128 is the Intel chip on this box —
+      # renderD129 is the NVIDIA card, which is not what we want.
+      - /dev/dri/renderD128:/dev/dri/renderD128
+
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/config
+      - ./media:/media/frigate
+      # Recording cache. Keeping it in RAM avoids grinding the system disk with
+      # constant small writes; 1GB is plenty for a single camera.
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+
+    ports:
+      - "5000:5000"   # web UI
+      - "8554:8554"   # RTSP restream (go2rtc)
+      - "8555:8555/tcp"
+      - "8555:8555/udp"
+
+    env_file:
+      - .env
