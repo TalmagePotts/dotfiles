@@ -15,7 +15,7 @@
 # file); the broker runs host-networked alongside Home Assistant.
 mqtt:
   enabled: true
-  host: host.docker.internal
+  host: 127.0.0.1
   port: 1883
   user: "{FRIGATE_MQTT_USER}"
   password: "{FRIGATE_MQTT_PASSWORD}"
@@ -83,6 +83,13 @@ go2rtc:
       # presents as "the stream has no sound" rather than a codec mismatch.
       # Transcoding 16kHz mono audio is negligible CPU.
       - "ffmpeg:nursery_sub#audio=opus"
+
+# Expose the camera to Apple's Home app. Requires host networking (above) so
+# the HomeKit accessory can advertise over mDNS. Pair with the PIN below.
+homekit:
+  nursery_sub:
+    pin: 19550224
+    name: Nursery
 
 cameras:
   nursery:

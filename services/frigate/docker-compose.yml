@@ -33,18 +33,15 @@ services:
         tmpfs:
           size: 1000000000
 
-    ports:
-      - "5000:5000"   # web UI
-      - "1984:1984"   # go2rtc web UI — direct low-latency stream with audio,
-                     # useful as a always-on baby-monitor tab
-      - "8554:8554"   # RTSP restream (go2rtc)
-      - "8555:8555/tcp"
-      - "8555:8555/udp"
-
-    # Frigate is on a bridge network; the MQTT broker is host-networked.
-    # This maps host.docker.internal to the host gateway so it can reach it.
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    # Host networking is REQUIRED for HomeKit: the HAP server advertises over
+    # mDNS, which does not cross Docker's bridge. Apple devices simply never
+    # discover the camera otherwise.
+    #
+    # Side effects: ports bind directly on the host (same numbers as before —
+    # 5000 UI, 1984 go2rtc, 8554 RTSP, 8555 WebRTC), so no `ports:` mapping is
+    # allowed, and host.docker.internal no longer resolves — the MQTT broker is
+    # reachable at 127.0.0.1 instead.
+    network_mode: host
 
     env_file:
       - .env
