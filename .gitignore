@@ -74,7 +74,9 @@ claude/.claude/plugins/
 claude/.claude/session-env/
 
 # Home Assistant instance data — credentials, device tokens, state database
-services/homeassistant/config/
+services/homeassistant/config/*
+# Automations are real config with no secrets in them — worth versioning.
+!services/homeassistant/config/automations.yaml
 
 # Frigate — camera credentials, recordings, and runtime database
 services/frigate/.env
