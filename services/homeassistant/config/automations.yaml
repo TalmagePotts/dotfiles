@@ -45,13 +45,16 @@
               critical: 1
               volume: 1.0
           url: /nursery
-    # After adding the Alexa integration, uncomment to announce on the Echo Dot.
-    # This is the piece that works with a locked phone.
-    # - action: notify.send_message
-    #   target:
-    #     entity_id: notify.echo_dot_announce
-    #   data:
-    #     message: "The baby is crying"
+    # Announce on our own Echo Dot. This is the piece that reaches you with a
+    # locked phone, which browser audio cannot do on iOS.
+    # NOTE: every other Echo on this Amazon Household belongs to the in-laws
+    # and is disabled in the device registry, so a mistargeted automation
+    # cannot announce in someone else's house.
+    - action: notify.send_message
+      target:
+        entity_id: notify.katriece_s_echo_dot_announce
+      data:
+        message: "The baby is crying"
 
 # ── Baby stirring ────────────────────────────────────────────────────────────
 # Babbling = awake but not upset. Deliberately NOT a critical alert, and a
