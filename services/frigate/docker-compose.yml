@@ -35,6 +35,8 @@ services:
 
     ports:
       - "5000:5000"   # web UI
+      - "1984:1984"   # go2rtc web UI — direct low-latency stream with audio,
+                     # useful as a always-on baby-monitor tab
       - "8554:8554"   # RTSP restream (go2rtc)
       - "8555:8555/tcp"
       - "8555:8555/udp"
