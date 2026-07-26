@@ -49,6 +49,19 @@ ffmpeg:
 # RTSP clients — without this, the third consumer gets refused and the symptom
 # looks like a flaky camera rather than a connection limit.
 go2rtc:
+  # WebRTC ICE candidates. Without these go2rtc advertises no reachable
+  # address, so a browser on any other machine cannot establish a peer
+  # connection and silently falls back to MSE/HLS. Those transports are
+  # one-way, so the microphone button never appears — which looks like
+  # missing two-way audio support rather than a networking gap.
+  #
+  # List every address a client might reach this host on: LAN and tailnet.
+  webrtc:
+    candidates:
+      - 192.168.0.94:8555
+      - 100.98.161.113:8555
+      - stun:8555
+
   streams:
     nursery:
       - "rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM_HOST}:554/h264Preview_01_main"
