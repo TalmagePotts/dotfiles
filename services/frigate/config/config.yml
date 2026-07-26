@@ -84,6 +84,13 @@ go2rtc:
       # Transcoding 16kHz mono audio is negligible CPU.
       - "ffmpeg:nursery_sub#audio=opus"
 
+    # Audio-only stream. Exists so the listen-only URL needs a single query
+    # parameter (?src=nursery_audio) instead of three joined by ampersands —
+    # every layer that touches a URL escapes & differently, and a mangled
+    # query string 404s in a way that looks like the stream is missing.
+    nursery_audio:
+      - "ffmpeg:nursery_sub#audio=aac#video="
+
 cameras:
   nursery:
     enabled: true
