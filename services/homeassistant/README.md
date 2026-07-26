@@ -65,3 +65,29 @@ specific device through by adding to the compose file:
 
 Use the `by-id` path — `/dev/ttyUSB0` is assigned in enumeration order and
 moves between reboots.
+
+## HTTPS via Tailscale Serve
+
+Browsers only grant microphone access in a **secure context**. Home Assistant
+served over plain HTTP on a LAN IP therefore cannot do two-way audio at all —
+the camera card hides the microphone button entirely, which reads as a missing
+feature rather than a browser restriction.
+
+Tailscale Serve fixes this with a real certificate, no port forwarding and no
+self-signed warnings:
+
+```sh
+sudo tailscale serve --bg --https=443 http://127.0.0.1:8123
+# disable with: sudo tailscale serve --https=443 off
+```
+
+HA is then reachable at `https://<host>.<tailnet>.ts.net` from any device on
+the tailnet.
+
+This requires the `http:` block in `config/configuration.yaml` setting
+`use_x_forwarded_for` with `127.0.0.1` as a trusted proxy — without it HA sees
+every request as coming from localhost and rejects logins as originating from
+an untrusted proxy.
+
+Note the plain `http://<lan-ip>:8123` route still works and is still insecure;
+use the Tailscale hostname when you need the microphone.
