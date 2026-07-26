@@ -63,8 +63,17 @@ go2rtc:
       - stun:8555
 
   streams:
+    # Main stream: 2880x1616 @ 20fps. Used for recording, where the detail
+    # matters and nothing has to survive a browser's network path.
     nursery:
       - "rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM_HOST}:554/h264Preview_01_main"
+
+    # Sub stream: 896x512 @ 10fps. Used for LIVE VIEW only. Pushing the 4.6MP
+    # main stream to a browser over WebRTC is what makes live view stutter —
+    # the camera is on WiFi and the decode/transport cost is wildly
+    # disproportionate for a monitor feed. Recording quality is unaffected.
+    nursery_sub:
+      - "rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM_HOST}:554/h264Preview_01_sub"
 
 cameras:
   nursery:
