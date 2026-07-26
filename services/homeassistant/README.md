@@ -91,3 +91,20 @@ an untrusted proxy.
 
 Note the plain `http://<lan-ip>:8123` route still works and is still insecure;
 use the Tailscale hostname when you need the microphone.
+
+### go2rtc over the same HTTPS origin
+
+Two-way audio needs WebRTC, and WebRTC was never negotiated when the camera
+card reached go2rtc through Frigate's proxy — the client went straight to MSE,
+which iOS cannot play properly (video updated every ~10s). Exposing go2rtc on
+the same HTTPS origin gives WebRTC a path it will actually use:
+
+```sh
+sudo tailscale serve --bg --https=443 --set-path=/go2rtc http://127.0.0.1:1984
+```
+
+Then set the card's `go2rtc.url` to `https://<host>.<tailnet>.ts.net/go2rtc`.
+
+Transport order matters on iOS: `webrtc, mp4, mse`. MSE must come last — iOS
+has no usable MSE support, and the card will happily select it and appear
+broken rather than falling back.
