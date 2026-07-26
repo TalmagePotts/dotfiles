@@ -84,13 +84,6 @@ go2rtc:
       # Transcoding 16kHz mono audio is negligible CPU.
       - "ffmpeg:nursery_sub#audio=opus"
 
-# Expose the camera to Apple's Home app. Requires host networking (above) so
-# the HomeKit accessory can advertise over mDNS. Pair with the PIN below.
-homekit:
-  nursery_sub:
-    pin: 19550224
-    name: Nursery
-
 cameras:
   nursery:
     enabled: true
