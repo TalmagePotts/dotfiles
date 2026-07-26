@@ -1,0 +1,75 @@
+# ── Baby crying ──────────────────────────────────────────────────────────────
+# Fires on EITHER cry detector: the camera's own AI (Reolink) or Frigate's
+# YAMNet audio model. Neither has been validated against a real cry yet, so
+# both are wired up — whichever proves reliable can be trimmed later.
+#
+# `for: 8s` matters: without it a cough, a door, or a single blip triggers it.
+# Requiring sustained sound is the difference between a useful alert and one
+# that gets muted within a day.
+- id: baby_crying
+  alias: Baby crying
+  description: Notify both phones when either cry detector fires
+  mode: single
+  max_exceeded: silent          # a 10-minute cry must not send 40 notifications
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.anya_baby_crying
+      to: "on"
+      for: "00:00:08"
+    - trigger: state
+      entity_id: binary_sensor.bedroom_anya_crying_sound
+      to: "on"
+      for: "00:00:08"
+  actions:
+    - action: notify.mobile_app_pan
+      data:
+        title: "👶 Baby is crying"
+        message: "Crying detected in the nursery"
+        data:
+          # iOS critical alert: breaks through silent mode and Do Not Disturb.
+          # Appropriate here and almost nowhere else — do not reuse casually.
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+          url: /nursery
+    - action: notify.mobile_app_kate_2
+      data:
+        title: "👶 Baby is crying"
+        message: "Crying detected in the nursery"
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+          url: /nursery
+    # After adding the Alexa integration, uncomment to announce on the Echo Dot.
+    # This is the piece that works with a locked phone.
+    # - action: notify.send_message
+    #   target:
+    #     entity_id: notify.echo_dot_announce
+    #   data:
+    #     message: "The baby is crying"
+
+# ── Baby stirring ────────────────────────────────────────────────────────────
+# Babbling = awake but not upset. Deliberately NOT a critical alert, and a
+# longer hold, because this is informational rather than urgent.
+- id: baby_stirring
+  alias: Baby stirring
+  description: Quiet heads-up that the baby is awake but not crying
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.bedroom_anya_babbling_sound
+      to: "on"
+      for: "00:00:15"
+  actions:
+    - action: notify.mobile_app_pan
+      data:
+        title: "🌙 Baby is stirring"
+        message: "Babbling in the nursery — awake but not crying"
+        data:
+          url: /nursery
