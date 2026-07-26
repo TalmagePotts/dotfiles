@@ -77,6 +77,12 @@ go2rtc:
       # Second source contributes ONLY the talkback channel, so switching live
       # view to the sub stream does not cost the microphone.
       - "rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM_HOST}:554/h264Preview_01_sub#backchannel=1"
+      # The camera emits AAC. HLS and MSE play AAC fine, but WebRTC cannot
+      # carry it at all — it only accepts Opus, PCMU or PCMA. Without this
+      # transcode WebRTC negotiates video and silently drops audio, which
+      # presents as "the stream has no sound" rather than a codec mismatch.
+      # Transcoding 16kHz mono audio is negligible CPU.
+      - "ffmpeg:nursery_sub#audio=opus"
 
 cameras:
   nursery:
