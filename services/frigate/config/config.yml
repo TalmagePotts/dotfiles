@@ -74,6 +74,9 @@ go2rtc:
     # disproportionate for a monitor feed. Recording quality is unaffected.
     nursery_sub:
       - "rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM_HOST}:554/h264Preview_01_sub"
+      # Second source contributes ONLY the talkback channel, so switching live
+      # view to the sub stream does not cost the microphone.
+      - "rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASSWORD}@{FRIGATE_CAM_HOST}:554/h264Preview_01_sub#backchannel=1"
 
 cameras:
   nursery:
