@@ -29,6 +29,25 @@ services:
 
     privileged: true
 
+    # Zigbee coordinator (SONOFF ZBDongle-P). `privileged: true` alone is NOT
+    # enough — it grants device *permissions*, but Docker still only populates
+    # the container's /dev with nodes that existed at creation time, so a dongle
+    # plugged in later is simply absent inside the container. The symptom is ZHA
+    # offering no serial ports to pick from, which reads as an unsupported
+    # adapter rather than a missing mapping.
+    #
+    # ZIGBEE_DEVICE is set per-machine in .env (untracked) because the path
+    # embeds the dongle's own serial number. Always use the /dev/serial/by-id/
+    # path, never /dev/ttyUSB0 — kernel numbering is assigned in probe order, so
+    # adding any other USB serial device silently renumbers it and ZHA comes up
+    # pointed at the wrong hardware.
+    #
+    # Find it with:  ls -l /dev/serial/by-id/
+    #
+    # Defaults to /dev/null so hosts without a dongle still deploy cleanly.
+    devices:
+      - ${ZIGBEE_DEVICE:-/dev/null}:/dev/ttyUSB0
+
     volumes:
       # Persistent config. Everything you configure in the UI lives here —
       # this directory IS your Home Assistant instance. Back it up.
