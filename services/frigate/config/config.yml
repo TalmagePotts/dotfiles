@@ -84,6 +84,19 @@ go2rtc:
       # Transcoding 16kHz mono audio is negligible CPU.
       - "ffmpeg:nursery_sub#audio=opus"
 
+    # Duplicate of the sub stream, existing ONLY to back a second HomeKit
+    # accessory (see go2rtc_homekit.yml). A HomeKit accessory belongs to exactly
+    # one Apple Home, so getting the nursery into a second phone's Home requires
+    # a second accessory — and go2rtc keys accessories by stream name, so it
+    # requires a second stream name to hang it off.
+    #
+    # Sources from go2rtc's own restream rather than the camera, so this costs
+    # zero additional RTSP connections to the Reolink. Pointing it at the camera
+    # directly would spend one of its small pool of concurrent clients and start
+    # failing the streams that matter.
+    nursery_kate:
+      - "rtsp://127.0.0.1:8554/nursery_sub"
+
     # Audio-only stream. Exists so the listen-only URL needs a single query
     # parameter (?src=nursery_audio) instead of three joined by ampersands —
     # every layer that touches a URL escapes & differently, and a mangled
