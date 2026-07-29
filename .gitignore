@@ -77,6 +77,10 @@ claude/.claude/session-env/
 services/homeassistant/config/*
 # Automations are real config with no secrets in them — worth versioning.
 !services/homeassistant/config/automations.yaml
+# Likewise configuration.yaml: HomeKit bridges, template entities and the http
+# proxy settings. Credentials live in .storage and secrets.yaml, not here, and
+# without this the entire hand-written config is untracked on one disk.
+!services/homeassistant/config/configuration.yaml
 
 # Frigate — camera credentials, recordings, and runtime database
 services/frigate/.env
