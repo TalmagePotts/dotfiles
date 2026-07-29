@@ -135,7 +135,7 @@ template:
               entity_id: media_player.living_room
             data:
               media_content_type: url
-              media_content_id: rtsp://192.168.0.94:8554/nursery_sub
+              media_content_id: rtsp://192.168.0.94:8554/nursery_tv
         turn_off:
           # HOME rather than killing VLC: returns to the launcher and leaves
           # whatever was playing before recoverable.
