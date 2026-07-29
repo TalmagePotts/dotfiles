@@ -1,78 +1,203 @@
-# ── Baby crying ──────────────────────────────────────────────────────────────
-# Fires on EITHER cry detector: the camera's own AI (Reolink) or Frigate's
-# YAMNet audio model. Neither has been validated against a real cry yet, so
-# both are wired up — whichever proves reliable can be trimmed later.
-#
-# `for: 8s` matters: without it a cough, a door, or a single blip triggers it.
-# Requiring sustained sound is the difference between a useful alert and one
-# that gets muted within a day.
 - id: baby_crying
   alias: Baby crying
   description: Notify both phones when either cry detector fires
   mode: single
-  max_exceeded: silent          # a 10-minute cry must not send 40 notifications
+  max_exceeded: silent
   triggers:
-    - trigger: state
-      entity_id: binary_sensor.anya_baby_crying
-      to: "on"
-      for: "00:00:08"
-    - trigger: state
-      entity_id: binary_sensor.bedroom_anya_crying_sound
-      to: "on"
-      for: "00:00:08"
+  - trigger: state
+    entity_id: binary_sensor.anya_baby_crying
+    to: 'on'
+    for: 00:00:08
+  - trigger: state
+    entity_id: binary_sensor.bedroom_anya_crying_sound
+    to: 'on'
+    for: 00:00:08
   actions:
-    - action: notify.mobile_app_pan
+  - action: notify.mobile_app_pan
+    data:
+      title: "\U0001F476 Baby is crying"
+      message: Crying detected in the nursery
       data:
-        title: "👶 Baby is crying"
-        message: "Crying detected in the nursery"
-        data:
-          # iOS critical alert: breaks through silent mode and Do Not Disturb.
-          # Appropriate here and almost nowhere else — do not reuse casually.
-          push:
-            sound:
-              name: default
-              critical: 1
-              volume: 1.0
-          url: /nursery
-    - action: notify.mobile_app_kate_2
+        push:
+          sound:
+            name: default
+            critical: 1
+            volume: 1.0
+        url: /nursery
+  - action: notify.mobile_app_kate_2
+    data:
+      title: "\U0001F476 Baby is crying"
+      message: Crying detected in the nursery
       data:
-        title: "👶 Baby is crying"
-        message: "Crying detected in the nursery"
-        data:
-          push:
-            sound:
-              name: default
-              critical: 1
-              volume: 1.0
-          url: /nursery
-    # Announce on our own Echo Dot. This is the piece that reaches you with a
-    # locked phone, which browser audio cannot do on iOS.
-    # NOTE: every other Echo on this Amazon Household belongs to the in-laws
-    # and is disabled in the device registry, so a mistargeted automation
-    # cannot announce in someone else's house.
-    - action: notify.send_message
-      target:
-        entity_id: notify.katriece_s_echo_dot_announce
-      data:
-        message: "The baby is crying"
-
-# ── Baby stirring ────────────────────────────────────────────────────────────
-# Babbling = awake but not upset. Deliberately NOT a critical alert, and a
-# longer hold, because this is informational rather than urgent.
+        push:
+          sound:
+            name: default
+            critical: 1
+            volume: 1.0
+        url: /nursery
+  - action: notify.send_message
+    target:
+      entity_id: notify.katriece_s_echo_dot_announce
+    data:
+      message: The baby is crying
 - id: baby_stirring
   alias: Baby stirring
   description: Quiet heads-up that the baby is awake but not crying
   mode: single
   max_exceeded: silent
   triggers:
-    - trigger: state
-      entity_id: binary_sensor.bedroom_anya_babbling_sound
-      to: "on"
-      for: "00:00:15"
+  - trigger: state
+    entity_id: binary_sensor.bedroom_anya_babbling_sound
+    to: 'on'
+    for: 00:00:15
   actions:
-    - action: notify.mobile_app_pan
+  - action: notify.mobile_app_pan
+    data:
+      title: "\U0001F319 Baby is stirring"
+      message: Babbling in the nursery — awake but not crying
       data:
-        title: "🌙 Baby is stirring"
-        message: "Babbling in the nursery — awake but not crying"
-        data:
-          url: /nursery
+        url: /nursery
+- id: '1785272036793'
+  alias: Sunset + Kate home
+  description: ''
+  triggers:
+  - trigger: sun.sunset
+    options: {}
+  conditions:
+  - condition: zone.in_zone
+    target:
+      entity_id:
+      - person.katriece_potts
+      - person.talmage_potts
+      - device_tracker.pan
+      - device_tracker.kate_2
+      device_id:
+      - 8bf9c8dfa51671613623fbf72eae7e12
+      - 195f17a58fb2c8e2251ec73380a58dbd
+    options:
+      behavior: any
+      for: 00:00:00
+      zone: zone.home
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    target:
+      device_id: f32069b5f1837650c93b2992c07fef2c
+    data: {}
+  mode: single
+- id: '1785272171662'
+  alias: Get home at night
+  description: ''
+  triggers:
+  - trigger: zone.entered
+    target:
+      entity_id:
+      - person.katriece_potts
+      - person.talmage_potts
+      - device_tracker.kate_2
+      - device_tracker.pan
+      device_id:
+      - 195f17a58fb2c8e2251ec73380a58dbd
+      - 8bf9c8dfa51671613623fbf72eae7e12
+    options:
+      behavior: each
+      for: 00:00:00
+      zone: zone.home
+  conditions:
+  - condition: sun.is_night
+    options: {}
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    target:
+      device_id: f32069b5f1837650c93b2992c07fef2c
+    data: {}
+  mode: single
+- id: '1785272797613'
+  alias: Leave house
+  description: ''
+  triggers:
+  - trigger: zone.left
+    target:
+      entity_id:
+      - person.katriece_potts
+      - device_tracker.kate_2
+      - device_tracker.pan
+      - person.talmage_potts
+      device_id:
+      - 8bf9c8dfa51671613623fbf72eae7e12
+      - 195f17a58fb2c8e2251ec73380a58dbd
+    options:
+      behavior: all
+      for: 00:00:00
+      zone: zone.home
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    target:
+      device_id: f32069b5f1837650c93b2992c07fef2c
+    data: {}
+  mode: single
+- id: '1785291248858'
+  alias: New automation
+  description: ''
+  triggers:
+  - trigger: time
+    at: '22:16:00'
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    target:
+      device_id: f32069b5f1837650c93b2992c07fef2c
+    data: {}
+  mode: single
+- id: homekit_tv_remote_keys
+  alias: HomeKit TV remote to Google TV
+  description: >-
+    Makes the D-pad in the iOS Control Centre remote actually do something.
+    HomeKit sends every key correctly, but Home Assistant only handles
+    play/pause directly (see set_remote_key in homekit/type_media_players.py) -
+    every other key is fired onto the event bus and dropped unless something
+    listens. That is why play/pause and mute worked while the arrows looked
+    dead. A media_player has no concept of a direction, so the keys have to be
+    forwarded to the androidtv_remote *remote* entity instead.
+  mode: queued
+  max: 20
+  triggers:
+  - trigger: event
+    event_type: homekit_tv_remote_key_pressed
+    event_data:
+      entity_id: media_player.living_room
+  actions:
+  - variables:
+      key_map:
+        arrow_up: DPAD_UP
+        arrow_down: DPAD_DOWN
+        arrow_left: DPAD_LEFT
+        arrow_right: DPAD_RIGHT
+        select: DPAD_CENTER
+        back: BACK
+        exit: HOME
+        information: INFO
+        rewind: MEDIA_REWIND
+        fast_forward: MEDIA_FAST_FORWARD
+        next_track: MEDIA_NEXT
+        previous_track: MEDIA_PREVIOUS
+      command: '{{ key_map.get(trigger.event.data.key_name, "") }}'
+  - condition: template
+    value_template: '{{ command != "" }}'
+  - action: remote.send_command
+    target:
+      entity_id: remote.living_room
+    data:
+      command: '{{ command }}'
