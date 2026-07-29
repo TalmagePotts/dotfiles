@@ -1,0 +1,146 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Tailscale Serve terminates HTTPS on the host and proxies to HA over
+# 127.0.0.1. Without this, HA sees every request as coming from localhost and
+# rejects logins as originating from an untrusted proxy.
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1
+
+# HomeKit Bridge — exposes Home Assistant entities to Apple Home, so Siri and
+# the Home app control them from every Apple device in the house. Fully local;
+# no subscription and no cloud round-trip.
+#
+# SEPARATE from the HomeKit accessory go2rtc publishes for the nursery camera.
+# That one is served by go2rtc directly and pairs on its own PIN. The camera
+# domain is deliberately left out below so the nursery does not appear twice in
+# the Home app as two unrelated accessories.
+#
+# Filtered rather than exposing everything, for two reasons: a bridge is capped
+# at 150 accessories, and most of what HA calls a "switch" is not a thing anyone
+# wants in the Home app.
+#
+# The exclusions matter more than they look. `switch` has to stay included so
+# Zigbee smart plugs land in Apple Home — but the Reolink and Frigate
+# integrations both expose their entire configuration surface as switches
+# (FTP upload, siren-on-event, snapshot recording...), and the Alexa integration
+# adds do-not-disturb toggles. Bridged unfiltered, Apple Home fills with two
+# dozen entries nobody wants and the real devices get lost. Globs rather than
+# explicit ids so switches added by a future firmware update are caught too.
+homekit:
+  - name: Home Assistant Bridge
+    filter:
+      include_domains:
+        - light
+        - switch
+        - fan
+        - cover
+        - lock
+        - scene
+        # Google TV. androidtv_remote sets device_class TV, so HomeKit renders
+        # this as a real Television accessory — a D-pad remote in Control
+        # Centre — rather than a bare on/off tile.
+        - media_player
+      exclude_entity_globs:
+        - switch.anya_*
+        - switch.bedroom_anya_*
+        - switch.katriece_s_*
+        # The Echo is a media_player too, but a speaker Apple Home cannot
+        # usefully control. Without this the TV arrives with an Echo beside it.
+        - media_player.katriece_s_*
+
+  # Second bridge, paired to Kate's Apple Home.
+  #
+  # A HomeKit accessory belongs to exactly ONE Apple Home — pairing the bridge
+  # above to a second Home would remove it from the first, not share it. Sharing
+  # a single Home properly requires an Apple home hub (HomePod/Apple TV), which
+  # this household does not have, so each phone gets its own bridge instead.
+  #
+  # Consequence to remember: these are two independent Homes. They expose the
+  # same entities and both control them, but scenes and Apple-side automations
+  # do NOT sync between them, and each has to be set up separately. Replace both
+  # with one shared Home if a hub is ever added.
+  #
+  # Explicit port because the first bridge already holds 21063 (assigned when it
+  # was created); leaving this one to autoassign risks landing on the same port.
+  - name: HA Bridge Kate
+    port: 21064
+    filter:
+      include_domains:
+        - light
+        - switch
+        - fan
+        - cover
+        - lock
+        - scene
+        # Google TV. androidtv_remote sets device_class TV, so HomeKit renders
+        # this as a real Television accessory — a D-pad remote in Control
+        # Centre — rather than a bare on/off tile.
+        - media_player
+      exclude_entity_globs:
+        - switch.anya_*
+        - switch.bedroom_anya_*
+        - switch.katriece_s_*
+        # The Echo is a media_player too, but a speaker Apple Home cannot
+        # usefully control. Without this the TV arrives with an Echo beside it.
+        - media_player.katriece_s_*
+
+# "Nursery Camera" as a switch, so every voice assistant can put the camera on
+# the TV: "turn on nursery camera".
+#
+# Why a switch: Google and Alexa cannot see the camera at all — Matter has no
+# working camera device type, and the Google Assistant route needs either a
+# Nabu Casa subscription or Home Assistant exposed to the public internet. A
+# script CAN be published over Matter but only as a momentary trigger, so it
+# could start the stream and never stop it. `switch` is already included in the
+# Matter bridge and both HomeKit bridges, so this single entity reaches Google,
+# Alexa and Siri without touching any of those filters.
+#
+# Why VLC over an RTSP URL rather than casting:
+#   Chromecast cannot do low latency. Its receiver takes HLS (segmented, so
+#   10-20s behind) or progressive MP4 — and progressive MP4 has no live
+#   semantics at all, so the playhead starts at zero and drifts further behind
+#   the longer it runs (measured: over a minute). WebRTC, the only thing that
+#   reaches sub-second, is not supported by the Default Media Receiver.
+#   Handing the RTSP restream straight to a real player on the TV skips
+#   Chromecast entirely and lands around 1s — the same as the Reolink app.
+#
+# Points at go2rtc's restream (port 8554), NOT the camera. The Reolink allows
+# only a couple of concurrent RTSP clients, and spending one here would starve
+# recording and cry detection. go2rtc already holds that single connection and
+# fans it out.
+template:
+  - switch:
+      - name: Nursery Camera
+        unique_id: nursery_camera_cast
+        icon: mdi:cctv
+        # Derived from whatever is actually in the foreground, so exiting VLC
+        # with the remote still reports this as off instead of drifting.
+        state: "{{ is_state_attr('media_player.living_room', 'app_id', 'org.videolan.vlc') }}"
+        turn_on:
+          - action: media_player.play_media
+            target:
+              entity_id: media_player.living_room
+            data:
+              media_content_type: url
+              media_content_id: rtsp://192.168.0.94:8554/nursery_sub
+        turn_off:
+          # HOME rather than killing VLC: returns to the launcher and leaves
+          # whatever was playing before recoverable.
+          - action: remote.send_command
+            target:
+              entity_id: remote.living_room
+            data:
+              command: HOME
