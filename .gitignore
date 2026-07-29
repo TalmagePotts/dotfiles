@@ -85,6 +85,15 @@ services/frigate/config/*.db
 services/frigate/config/*.db-*
 services/frigate/config/model_cache/
 services/frigate/config/backup_config.yaml
+# Frigate runtime state written beside the config
+services/frigate/config/.exports
+services/frigate/config/.jwt_secret
+services/frigate/config/.search_stats.json
+services/frigate/config/.timeline
+services/frigate/config/.vacuum
+# go2rtc HomeKit accessories: per-device PINs and controller pairing keys.
+# Machine-local pairing state, and re-pairing is required if it is lost.
+services/frigate/config/go2rtc_homekit.yml
 
 # Matter Hub — HA access token, and the Matter fabric state (bridge identity
 # plus every controller pairing). Machine-specific; back data/ up separately.
