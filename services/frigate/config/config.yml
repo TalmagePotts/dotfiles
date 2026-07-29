@@ -97,6 +97,24 @@ go2rtc:
     nursery_kate:
       - "rtsp://127.0.0.1:8554/nursery_sub"
 
+    # Clean stream for playback on the TV. Two reasons it is not just
+    # nursery_sub:
+    #
+    #   1. nursery_sub carries a `sendonly` PCMU track — the microphone
+    #      backchannel. Players that only ever receive can choke on being
+    #      offered a track they are expected to send, and the failure mode is a
+    #      black screen rather than an error.
+    #   2. Selecting tracks inline would mean a URL like
+    #      "...?video=h264&audio=aac", and this URL is handed to VLC through an
+    #      Android intent. Query strings do not reliably survive that trip —
+    #      the same ampersand problem that broke the listen-only link before.
+    #
+    # A dedicated stream name means the URL is bare: rtsp://host:8554/nursery_tv
+    #
+    # Sources from the restream, so it costs no extra connection to the camera.
+    nursery_tv:
+      - "rtsp://127.0.0.1:8554/nursery_sub?video=h264&audio=aac"
+
     # Audio-only stream. Exists so the listen-only URL needs a single query
     # parameter (?src=nursery_audio) instead of three joined by ampersands —
     # every layer that touches a URL escapes & differently, and a mangled
