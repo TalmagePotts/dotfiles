@@ -97,50 +97,37 @@ homekit:
         # usefully control. Without this the TV arrives with an Echo beside it.
         - media_player.katriece_s_*
 
-# "Nursery Camera" as a switch, so every voice assistant can put the camera on
+# "Nursery Camera" as a switch, so every voice assistant can cast the camera to
 # the TV: "turn on nursery camera".
 #
-# Why a switch: Google and Alexa cannot see the camera at all — Matter has no
-# working camera device type, and the Google Assistant route needs either a
-# Nabu Casa subscription or Home Assistant exposed to the public internet. A
-# script CAN be published over Matter but only as a momentary trigger, so it
-# could start the stream and never stop it. `switch` is already included in the
-# Matter bridge and both HomeKit bridges, so this single entity reaches Google,
+# Why a template switch rather than the obvious alternatives:
+#   - Google/Alexa cannot see the camera at all. Matter has no working camera
+#     device type, and the Google Assistant route needs either a Nabu Casa
+#     subscription or Home Assistant exposed to the public internet.
+#   - A script CAN be published over Matter, but only as a momentary trigger —
+#     it can start the cast and never stop it.
+# A switch has real on/off semantics, and `switch` is already included in the
+# Matter bridge and both HomeKit bridges, so this one entity reaches Google,
 # Alexa and Siri without touching any of those filters.
 #
-# Why VLC over an RTSP URL rather than casting:
-#   Chromecast cannot do low latency. Its receiver takes HLS (segmented, so
-#   10-20s behind) or progressive MP4 — and progressive MP4 has no live
-#   semantics at all, so the playhead starts at zero and drifts further behind
-#   the longer it runs (measured: over a minute). WebRTC, the only thing that
-#   reaches sub-second, is not supported by the Default Media Receiver.
-#   Handing the RTSP restream straight to a real player on the TV skips
-#   Chromecast entirely and lands around 1s — the same as the Reolink app.
-#
-# Points at go2rtc's restream (port 8554), NOT the camera. The Reolink allows
-# only a couple of concurrent RTSP clients, and spending one here would starve
-# recording and cry detection. go2rtc already holds that single connection and
-# fans it out.
+# The state is derived from the Chromecast rather than stored, so turning the TV
+# off by any other means still shows this as off. CC1AD845 is the Default Media
+# Receiver — the app HA casts through.
 template:
   - switch:
       - name: Nursery Camera
         unique_id: nursery_camera_cast
         icon: mdi:cctv
-        # Derived from whatever is actually in the foreground, so exiting VLC
-        # with the remote still reports this as off instead of drifting.
-        state: "{{ is_state_attr('media_player.living_room', 'app_id', 'org.videolan.vlc') }}"
+        state: >-
+          {{ is_state_attr('media_player.living_room_2', 'app_id', 'CC1AD845')
+             and states('media_player.living_room_2') in ['playing', 'buffering'] }}
         turn_on:
-          - action: media_player.play_media
-            target:
-              entity_id: media_player.living_room
+          - action: camera.play_stream
             data:
-              media_content_type: url
-              media_content_id: rtsp://192.168.0.94:8554/nursery_tv
+              entity_id: camera.bedroom_anya
+              media_player: media_player.living_room_2
+              format: hls
         turn_off:
-          # HOME rather than killing VLC: returns to the launcher and leaves
-          # whatever was playing before recoverable.
-          - action: remote.send_command
+          - action: media_player.turn_off
             target:
-              entity_id: remote.living_room
-            data:
-              command: HOME
+              entity_id: media_player.living_room_2
