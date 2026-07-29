@@ -1,0 +1,51 @@
+# Home Assistant Matter Hub — publishes HA entities as a Matter bridge.
+#
+# Why this exists: Alexa and Google Home have no free, local way to see Home
+# Assistant. The official routes are a paid subscription (Nabu Casa) or an
+# internet-exposed HA behind a custom cloud skill. Matter sidesteps both — the
+# controllers talk to this bridge directly over the LAN, and nothing leaves the
+# house.
+#
+# Siri is NOT served from here. Apple Home is handled by HA's own HomeKit
+# bridges (see homeassistant/config/configuration.yaml); this is purely the
+# Alexa/Google half.
+#
+# Deploy:  docker compose up -d
+# Logs:    docker compose logs -f
+# UI:      http://<host-ip>:8482
+#
+# See README.md for the runbook, including creating the access token.
+
+services:
+  matter-hub:
+    container_name: matter-hub
+    # Community fork. The original (t0bst4r) was discontinued in January 2026;
+    # this fork is the maintained continuation. Pinned to :latest deliberately —
+    # an unmaintained-adjacent project is more likely to need a fix than to
+    # break, and nothing here is on the baby-monitor critical path.
+    image: ghcr.io/riddix/home-assistant-matter-hub:latest
+    restart: unless-stopped
+
+    # REQUIRED, not a convenience. Matter is IPv6-first and commissioning
+    # depends on mDNS plus link-local multicast, none of which survives Docker's
+    # bridge NAT. On a bridge network the container starts happily and then no
+    # controller can ever discover it — which reads as "Alexa can't find the
+    # bridge" rather than as a networking choice.
+    network_mode: host
+
+    environment:
+      # Points at HA on the same host. 127.0.0.1 works because HA is also
+      # host-networked; keep them consistent if either ever moves to a bridge.
+      - HAMH_HOME_ASSISTANT_URL=${HAMH_HOME_ASSISTANT_URL:-http://127.0.0.1:8123}
+      # Long-lived access token — machine-specific secret, lives in .env
+      # (untracked). Created in HA under Profile -> Security. See README.
+      - HAMH_HOME_ASSISTANT_ACCESS_TOKEN=${HAMH_HOME_ASSISTANT_ACCESS_TOKEN:?set this in .env — see README.md}
+      - HAMH_LOG_LEVEL=${HAMH_LOG_LEVEL:-info}
+      - HAMH_HTTP_PORT=${HAMH_HTTP_PORT:-8482}
+
+    volumes:
+      # Matter fabric state: the bridge's identity and every controller pairing.
+      # Losing this means re-commissioning the bridge in every ecosystem it was
+      # added to, so it is worth backing up alongside the HA config.
+      - ./data:/data
+      - /etc/localtime:/etc/localtime:ro
