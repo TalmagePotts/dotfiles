@@ -4,9 +4,17 @@
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-# Early-load p10k when installed via Homebrew (needed for instant prompt on Mac)
-[[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]] && \
-  source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+# Early-load p10k when installed via Homebrew (needed for instant prompt on Mac).
+# Both prefixes are tested literally rather than shelling out to `brew --prefix`
+# — this runs on every shell start, and a subprocess here is exactly the cost
+# instant prompt exists to avoid. /opt/homebrew is Apple Silicon, /usr/local Intel.
+for _p10k in /opt/homebrew /usr/local; do
+  if [[ -f "$_p10k/share/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+    source "$_p10k/share/powerlevel10k/powerlevel10k.zsh-theme"
+    break
+  fi
+done
+unset _p10k
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

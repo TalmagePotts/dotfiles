@@ -1,57 +1,53 @@
-# Talmage's Brewfile
-# Install everything: brew bundle install
+# Talmage's Brewfile — the lean macOS baseline.
+# Installed by default: ./install.sh
+#
+# Three tiers, smallest first:
+#
+#   Brewfile           this file. Terminal tools + the handful of GUI apps that
+#                      are load-bearing or that I want on literally every Mac.
+#                      No App Store login required, nothing over ~500MB.
+#   Brewfile.apps      coding apps and niche CLI utilities. Opt in with
+#                      `./install.sh --with-apps`. This is where Xcode lives.
+#   Brewfile.optional  multi-GB and per-project installs. Never automatic.
+#
+# This file is the Mac half of the core package list in install.sh; the apt
+# block there is the Linux half. Anything the stowed dotfiles depend on belongs
+# in BOTH, and belongs in this tier rather than the other two.
+#
+# No taps: everything here resolves from homebrew/core and homebrew/cask.
+#
+# Not here on purpose: uv, rustup/cargo, claude, ccstatusline, worktrunk. Those
+# use their own installers and install.sh handles them cross-platform.
 
-# Taps
-tap "anomalyco/tap"
-tap "schpet/tap"
-tap "steipete/tap"
-tap "whatpulse/whatpulse"
+# ── CLI: depended on by the stowed config ────────────────────────────────────
+# Removing any of these breaks something concrete — the reference is in comments.
+brew "atuin"           # Shell history with sync (.zshrc)
+brew "bat"             # Previewer for the fs/ff/ffd/ffq fzf aliases (.zshrc)
+brew "direnv"          # Per-directory env vars (.zshrc)
+brew "fd"              # ff/ffd/ffq aliases (.zshrc)
+brew "fzf"             # fs/fsg/ff/ffd/ffq aliases, gwcp project picker (.zshrc)
+brew "gh"              # gwc/gwcp draft-PR creation (.zshrc)
+brew "jq"              # wtclean worktree filtering (.zshrc)
+brew "lazygit"         # lg alias (.zshrc), config in terminal/.config/lazygit
+brew "neovim"          # the whole nvim stow package
+brew "node"            # Node.js; npm installs ccstatusline
+brew "powerlevel10k"   # Zsh theme (.zshrc, .p10k.zsh)
+brew "ripgrep"         # fs/fsg aliases (.zshrc)
+brew "stow"            # install.sh links every dotfile with this
+brew "tmux"            # terminal/.config/tmux
+brew "zoxide"          # .zshrc
 
-# CLI tools
-brew "atuin"           # Shell history with sync
-brew "ccusage"         # Claude API cost tracker
-brew "cmake"           # Build system
-brew "direnv"          # Per-directory env vars
+# ── CLI: small, wanted everywhere ────────────────────────────────────────────
+brew "ccusage"         # Claude Code cost tracker
 brew "git-filter-repo" # Rewrite git history
 brew "git-lfs"         # Git large file storage
-brew "mas"             # Mac App Store CLI
-brew "mole"            # SSH tunnel manager
-brew "neomutt"         # Terminal email client
-brew "nmap"            # Network scanner
-brew "node"            # Node.js
-brew "ocrmypdf"        # Add OCR to PDFs
-brew "pass"            # Password manager
-brew "pdftk-java"      # PDF toolkit
-brew "poppler"         # PDF rendering
-brew "postgresql@14"   # PostgreSQL database
-brew "powerlevel10k"   # Zsh theme
-brew "python@3.14"     # Python 3.14
-brew "tmux"            # Terminal multiplexer
-brew "w3m"             # Terminal web browser
-brew "xcode-build-server" # Xcode LSP support
 
-# GUI Apps
-cask "android-studio"  # Android development
-cask "arc"             # Browser
-cask "audacity"        # Audio editor
-cask "codex"           # OpenAI Codex
-cask "cursor"          # AI code editor
-cask "ghostty"         # Terminal
-cask "godot"           # Game engine
-cask "hammerspoon"     # macOS automation
+# ── GUI: load-bearing or universal ───────────────────────────────────────────
+cask "ghostty"         # Terminal — config in terminal/.config/ghostty
+cask "hammerspoon"     # macOS automation — config in mac/.hammerspoon
 cask "moonlight"       # Game streaming client
 cask "obsidian"        # Notes
-cask "raycast"         # App launcher
-cask "sf-symbols"      # Apple SF Symbols browser
+cask "tailscale-app"   # Tailnet — install.sh's closing steps tell you to sign in
 
 # Fonts
 cask "font-meslo-lg-nerd-font"  # Required for Powerlevel10k prompt
-
-# Mac App Store
-mas "Developer",            id: 640199958
-mas "NotesAI",              id: 6504924859
-mas "Obsidian Web Clipper", id: 6720708363
-mas "Reins",                id: 6739738501
-mas "SmartGo One",          id: 1465746992
-mas "TestFlight",           id: 899247664
-mas "Xcode",                id: 497799835

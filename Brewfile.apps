@@ -1,0 +1,53 @@
+# Talmage's Brewfile.apps — coding apps and niche CLI utilities.
+#
+# Opt in per machine:
+#   ./install.sh --with-apps
+#
+# Or later, on a machine that started lean:
+#   brew bundle install --file=~/code/dotfiles/Brewfile.apps
+#
+# This is the tier that turns a lean box into a full workstation. Nothing in the
+# stowed dotfiles depends on anything here — if something starts to, move it
+# into the main Brewfile.
+#
+# Xcode is the reason this tier exists: it is ~15GB from the App Store and
+# wants an Apple ID. Pulling it should be a decision, not a default.
+
+# ── Coding apps ──────────────────────────────────────────────────────────────
+cask "codex"           # OpenAI Codex
+cask "cursor"          # AI code editor
+cask "sf-symbols"      # Apple SF Symbols browser
+brew "xcode-build-server" # Xcode LSP support (sourcekit-lsp integration)
+
+# ── Everyday GUI ─────────────────────────────────────────────────────────────
+cask "arc"             # Browser
+cask "raycast"         # App launcher
+
+# ── Niche CLI ────────────────────────────────────────────────────────────────
+# Small, but none of it is load-bearing and a lean box does not need any of it.
+brew "mole"            # Deep clean / optimize your Mac (mole.fit).
+                       # NOT the davrodpin SSH-tunnel tool of the same name —
+                       # this is the core formula, which is what has actually
+                       # been installing all along.
+brew "neomutt"         # Terminal email client
+brew "nmap"            # Network scanner
+brew "ocrmypdf"        # Add OCR to PDFs
+brew "pass"            # Password manager
+brew "pdftk-java"      # PDF toolkit
+brew "poppler"         # PDF rendering
+brew "w3m"             # Terminal web browser
+
+# ── Mac App Store ────────────────────────────────────────────────────────────
+# Every MAS entry lives in this tier, so the lean install never needs an App
+# Store login. `mas` itself is only useful alongside them, so it lives here too.
+#
+# These fail until you are signed into the App Store — sign in, then re-run
+# `brew bundle install --file=Brewfile.apps` to pick them up.
+brew "mas"             # Mac App Store CLI
+mas "Developer",            id: 640199958
+mas "NotesAI",              id: 6504924859
+mas "Obsidian Web Clipper", id: 6720708363
+mas "Reins",                id: 6739738501
+mas "SmartGo One",          id: 1465746992
+mas "TestFlight",           id: 899247664
+mas "Xcode",                id: 497799835

@@ -12,10 +12,21 @@
 #   --mac           macOS setup via Homebrew.                       [default on Darwin]
 #
 # Options:
+#   --with-apps       macOS: also install the coding apps (Cursor, Codex, Xcode,
+#                     Arc, Raycast) from Brewfile.apps. Off by default — a plain
+#                     run installs only the lean terminal-tool baseline.
 #   --with-clipsync   Install the ClipSync clipboard-sync daemon (needs a desktop).
 #   --no-desktop      Server role only: skip installing a desktop environment entirely.
+#   --allow-dirty     Link dotfiles even with uncommitted changes here (discards them).
 #   --dry-run         Print what would happen without changing anything.
 #   -h, --help        Show this help.
+#
+# macOS package tiers:
+#   Brewfile           lean baseline — terminal tools, Ghostty, Obsidian,
+#                      Tailscale, Moonlight. No App Store login needed. Always.
+#   Brewfile.apps      coding apps + Xcode + niche CLI.        --with-apps
+#   Brewfile.optional  Android Studio, Godot, Postgres, …      manual only:
+#                      brew bundle install --file=Brewfile.optional
 #
 # The server role is what a Home Assistant box or similar always-on machine
 # wants: nothing graphical runs until you ask for it, so the idle footprint
@@ -51,6 +62,14 @@ run() {
   "$@"
 }
 
+# Everything that failed, collected so the run ends with a summary instead of a
+# wall of scrollback you have to re-read. The script deliberately does not use
+# `set -e` — one missing package should not abandon the other twenty steps — so
+# this is the only thing standing between a partial install and a silent one.
+FAILURES=()
+
+record_failure() { FAILURES+=("$1"); }
+
 # try: run a command and report honestly. Prints the success message only if the
 # command actually succeeded, and a warning with the exit code if it did not.
 # Exists because a plain `run cmd; ok "done"` claims success unconditionally —
@@ -63,8 +82,27 @@ try() {
   else
     local code=$?
     warn "FAILED (exit $code): $*"
+    record_failure "$success_msg (exit $code)"
     return $code
   fi
+}
+
+# need: abort when a command the rest of the script genuinely cannot work
+# without is missing. Reserved for hard dependencies — most things should
+# degrade to a warning via try() instead.
+need() {
+  local cmd="$1" why="$2"
+  command -v "$cmd" &>/dev/null && return 0
+  (( DRY_RUN )) && { warn "$cmd not installed — a real run would stop here ($why)"; return 1; }
+  fail "Required command '$cmd' not found — $why"
+  echo ""
+  echo "  Nothing was linked. Install it and re-run this script:"
+  if [[ "${OS:-}" == "mac" ]]; then
+    echo "    brew install $cmd"
+  else
+    echo "    sudo apt-get install -y $cmd"
+  fi
+  exit 1
 }
 
 # setup_intel_vaapi: enable hardware video decode on an Intel iGPU.
@@ -101,12 +139,21 @@ setup_intel_vaapi() {
   fi
 }
 
-usage() { sed -n '2,23p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0; }
+# Print the header comment block — everything from line 2 up to the first line
+# that is not a comment. Reads the block dynamically rather than hard-coding
+# `sed -n '2,23p'`, which silently prints the wrong thing the moment the header
+# grows or shrinks by a line.
+usage() {
+  awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "${BASH_SOURCE[0]}"
+  exit 0
+}
 
 # ── Parse arguments ──────────────────────────────────────────────────────────
 ROLE=""
 WITH_CLIPSYNC=0
+WITH_APPS=0
 NO_DESKTOP=0
+ALLOW_DIRTY=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -114,7 +161,9 @@ while [[ $# -gt 0 ]]; do
     --server)        ROLE="server" ;;
     --mac)           ROLE="mac" ;;
     --with-clipsync) WITH_CLIPSYNC=1 ;;
+    --with-apps)     WITH_APPS=1 ;;
     --no-desktop)    NO_DESKTOP=1 ;;
+    --allow-dirty)   ALLOW_DIRTY=1 ;;
     --dry-run)       DRY_RUN=1 ;;
     -h|--help)       usage ;;
     *) fail "Unknown option: $1"; echo "Run with --help for usage."; exit 1 ;;
@@ -172,25 +221,54 @@ if [[ "$OS" == "mac" ]]; then
   step "Installing Homebrew..."
   if ! command -v brew &>/dev/null; then
     run /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-    ok "Homebrew installed"
+    # The installer does not put brew on PATH for the shell that invoked it, so
+    # locate it by hand exactly once. Apple Silicon and Intel use different
+    # prefixes; hard-coding /opt/homebrew works right up until it doesn't.
+    for _brew in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+      [[ -x "$_brew" ]] && { eval "$("$_brew" shellenv)"; break; }
+    done
+    unset _brew
+    if command -v brew &>/dev/null; then
+      ok "Homebrew installed: $(brew --version | head -1)"
+    else
+      fail "Homebrew install did not produce a working 'brew' — cannot continue."
+      echo "  Install it manually from https://brew.sh and re-run this script."
+      exit 1
+    fi
   else
     ok "Homebrew already installed: $(brew --version | head -1)"
   fi
 
-  step "Installing apps via Brewfile (this takes a while)..."
+  # The lean baseline: terminal tools plus the few GUI apps that are
+  # load-bearing. Deliberately contains no App Store entries, so this step does
+  # not need an Apple ID and does not fail on a fresh machine.
+  step "Installing the lean baseline via Brewfile..."
   if run brew bundle install --file="$DOTFILES/Brewfile"; then
-    ok "All Brewfile packages installed"
+    ok "Lean baseline installed"
   else
     warn "Some packages failed — re-run 'brew bundle install --file=$DOTFILES/Brewfile' after fixing issues"
+    record_failure "brew bundle (lean baseline — some packages did not install)"
+  fi
+
+  if (( WITH_APPS )); then
+    step "Installing coding apps via Brewfile.apps (Xcode is ~15GB — this takes a while)..."
+    if run brew bundle install --file="$DOTFILES/Brewfile.apps"; then
+      ok "Coding apps installed"
+    else
+      warn "Some apps failed — re-run 'brew bundle install --file=$DOTFILES/Brewfile.apps' after fixing issues"
+      warn "The Mac App Store entries (Xcode, TestFlight, …) fail until you sign into the App Store."
+      record_failure "brew bundle (Brewfile.apps — some apps did not install)"
+    fi
+  else
+    skip "Coding apps skipped (Cursor, Codex, Xcode, Arc, Raycast) — add --with-apps for those"
   fi
 
   # Symlink p10k into oh-my-zsh themes so ZSH_THEME="powerlevel10k/powerlevel10k" works
   P10K_LINK="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
-  if [[ -d /opt/homebrew/share/powerlevel10k && ! -e "$P10K_LINK" ]]; then
+  P10K_SRC="$(brew --prefix 2>/dev/null)/share/powerlevel10k"
+  if [[ -d "$P10K_SRC" && ! -e "$P10K_LINK" ]]; then
     run mkdir -p "$(dirname "$P10K_LINK")"
-    run ln -sf /opt/homebrew/share/powerlevel10k "$P10K_LINK"
-    ok "Powerlevel10k linked into oh-my-zsh themes"
+    try "Powerlevel10k linked into oh-my-zsh themes" ln -sf "$P10K_SRC" "$P10K_LINK"
   fi
 
 elif [[ "$OS" == "ubuntu" ]]; then
@@ -231,9 +309,8 @@ elif [[ "$OS" == "ubuntu" ]]; then
 
   # bat is installed as 'batcat' and fd as 'fdfind' on Ubuntu — symlink to expected names
   run mkdir -p "$HOME/.local/bin"
-  [[ -f /usr/bin/batcat ]] && run ln -sf /usr/bin/batcat "$HOME/.local/bin/bat"
-  [[ -f /usr/bin/fdfind ]] && run ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
-  ok "bat and fd symlinked to ~/.local/bin"
+  [[ -f /usr/bin/batcat ]] && try "bat symlinked to ~/.local/bin" ln -sf /usr/bin/batcat "$HOME/.local/bin/bat"
+  [[ -f /usr/bin/fdfind ]] && try "fd symlinked to ~/.local/bin"  ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 
   # ── Docker ────────────────────────────────────────────────────────────────
   # From Docker's own apt repo, not Ubuntu's — the distro package lags badly and
@@ -249,10 +326,9 @@ elif [[ "$OS" == "ubuntu" ]]; then
         | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
       sudo apt-get update -qq
     fi
-    run sudo apt-get install -y \
+    try "Docker installed" sudo apt-get install -y \
       docker-ce docker-ce-cli containerd.io \
       docker-buildx-plugin docker-compose-plugin
-    ok "Docker installed"
   else
     ok "Docker already installed: $(docker --version 2>/dev/null || echo present)"
   fi
@@ -275,16 +351,59 @@ elif [[ "$OS" == "ubuntu" ]]; then
     ok "Tailscale already installed"
   fi
 
+  # These three install from upstream release tarballs rather than apt (the
+  # distro packages lag badly). Each is wrapped in a function so `try` can
+  # report the real exit status — as straight-line code under `if (( !
+  # DRY_RUN ))` the trailing `ok` fired even when the download 404'd.
+  #
+  # Release assets are named by Go/Rust arch strings, not dpkg's, so translate
+  # once here instead of hard-coding x86_64 and breaking on arm64 boxes.
+  case "$(uname -m)" in
+    x86_64|amd64) REL_ARCH="x86_64" ;;
+    aarch64|arm64) REL_ARCH="arm64" ;;
+    *) REL_ARCH="" ;;
+  esac
+
+  install_neovim() {
+    local url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${REL_ARCH}.tar.gz"
+    local tmp; tmp="$(mktemp -d)" || return 1
+    # Clean up the download even when a step below fails.
+    trap 'rm -rf "$tmp"' RETURN
+    curl -fLo "$tmp/nvim.tar.gz" "$url" || return 1
+    sudo tar -xf "$tmp/nvim.tar.gz" -C /opt/ || return 1
+    sudo ln -sf "/opt/nvim-linux-${REL_ARCH}/bin/nvim" /usr/local/bin/nvim
+  }
+
+  install_gh() {
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg status=none || return 1
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+      | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null || return 1
+    sudo apt-get update -qq && sudo apt-get install -y gh
+  }
+
+  install_lazygit() {
+    local tmp; tmp="$(mktemp -d)" || return 1
+    trap 'rm -rf "$tmp"' RETURN
+    local version
+    version=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
+      | grep -Po '"tag_name": "v\K[^"]*') || return 1
+    [[ -n "$version" ]] || return 1
+    curl -fLo "$tmp/lazygit.tar.gz" \
+      "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${version}_Linux_${REL_ARCH}.tar.gz" || return 1
+    tar -xf "$tmp/lazygit.tar.gz" -C "$tmp" lazygit || return 1
+    sudo install "$tmp/lazygit" /usr/local/bin
+  }
+
   # Neovim: apt version is outdated; install latest from GitHub releases
   if ! command -v nvim &>/dev/null; then
     step "Installing neovim..."
-    if (( ! DRY_RUN )); then
-      curl -Lo /tmp/nvim.tar.gz "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
-      sudo tar -xf /tmp/nvim.tar.gz -C /opt/
-      sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
-      rm /tmp/nvim.tar.gz
+    if [[ -z "$REL_ARCH" ]]; then
+      warn "Unrecognised architecture $(uname -m) — install neovim manually"
+      record_failure "neovim (unsupported arch $(uname -m))"
+    else
+      try "neovim installed" install_neovim
     fi
-    ok "neovim installed"
   else
     ok "neovim already installed: $(nvim --version | head -1)"
   fi
@@ -292,14 +411,7 @@ elif [[ "$OS" == "ubuntu" ]]; then
   # GitHub CLI
   if ! command -v gh &>/dev/null; then
     step "Installing GitHub CLI..."
-    if (( ! DRY_RUN )); then
-      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-        | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-      sudo apt-get update -qq && sudo apt-get install -y gh
-    fi
-    ok "GitHub CLI installed"
+    try "GitHub CLI installed" install_gh
   else
     ok "GitHub CLI already installed"
   fi
@@ -307,16 +419,12 @@ elif [[ "$OS" == "ubuntu" ]]; then
   # lazygit
   if ! command -v lazygit &>/dev/null; then
     step "Installing lazygit..."
-    if (( ! DRY_RUN )); then
-      LG_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
-        | grep -Po '"tag_name": "v\K[^"]*')
-      curl -Lo /tmp/lazygit.tar.gz \
-        "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LG_VERSION}_Linux_x86_64.tar.gz"
-      tar -xf /tmp/lazygit.tar.gz -C /tmp lazygit
-      sudo install /tmp/lazygit /usr/local/bin
-      rm /tmp/lazygit /tmp/lazygit.tar.gz
+    if [[ -z "$REL_ARCH" ]]; then
+      warn "Unrecognised architecture $(uname -m) — install lazygit manually"
+      record_failure "lazygit (unsupported arch $(uname -m))"
+    else
+      try "lazygit installed" install_lazygit
     fi
-    ok "lazygit installed"
   else
     ok "lazygit already installed"
   fi
@@ -335,25 +443,35 @@ elif [[ "$OS" == "ubuntu" ]]; then
     ok "atuin already installed"
   fi
 
-  # uv — Python package/venv manager
-  if ! command -v uv &>/dev/null; then
-    step "Installing uv..."
-    try "uv installed" sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"
-  else
-    ok "uv already installed"
-  fi
-
-  # rustup — also provides cargo, which installs worktrunk below
-  if ! command -v rustup &>/dev/null; then
-    step "Installing rustup..."
-    try "rustup installed (stable toolchain included)" \
-      sh -c "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
-  else
-    ok "rustup already installed: $(rustup --version 2>/dev/null | head -1)"
-  fi
 fi
 
 # ── 3. Cross-platform CLI tooling ────────────────────────────────────────────
+# Everything here uses its own installer rather than apt/brew, so it runs the
+# same way on both platforms. uv and rustup used to live in the Ubuntu-only
+# branch, which meant a Mac silently got neither — and with no cargo, the
+# `cargo install worktrunk` below was skipped too, leaving the gm/gwc/gwcp/
+# wtclean shell functions and the tmux prefix+g binding as dead keys.
+
+# uv — Python package/venv manager
+if ! command -v uv &>/dev/null; then
+  step "Installing uv..."
+  try "uv installed" sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"
+else
+  ok "uv already installed"
+fi
+
+# rustup — also provides cargo, which installs worktrunk below.
+# Not the Homebrew `rustup` formula on Mac: that one no longer ships
+# rustup-init and needs its own PATH entry, whereas this installer puts cargo
+# in ~/.cargo/bin, which .zshrc already adds and this script already sources.
+if ! command -v rustup &>/dev/null; then
+  step "Installing rustup..."
+  try "rustup installed (stable toolchain included)" \
+    sh -c "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+else
+  ok "rustup already installed: $(rustup --version 2>/dev/null | head -1)"
+fi
+
 step "Installing Claude Code and friends..."
 
 if ! command -v claude &>/dev/null; then
@@ -369,10 +487,14 @@ if ! command -v ccstatusline &>/dev/null; then
   # with EACCES for a normal user; installing under sudo instead would leave
   # root-owned files in the user's tree, which is worse.
   if command -v npm &>/dev/null; then
-    NPM_PREFIX="$(npm config get prefix 2>/dev/null)"
-    if [[ "$NPM_PREFIX" != "$HOME"* ]]; then
-      run npm config set prefix "$HOME/.local"
-      ok "npm global prefix set to ~/.local (no sudo needed for -g installs)"
+    # Mac is exempt: Homebrew's prefix is already user-writable, so repointing
+    # npm there fixes nothing and just splits global installs across two trees.
+    if [[ "$OS" == "ubuntu" ]]; then
+      NPM_PREFIX="$(npm config get prefix 2>/dev/null)"
+      if [[ "$NPM_PREFIX" != "$HOME"* ]]; then
+        try "npm global prefix set to ~/.local (no sudo needed for -g installs)" \
+          npm config set prefix "$HOME/.local"
+      fi
     fi
     try "ccstatusline installed" npm install -g ccstatusline
   else
@@ -399,8 +521,10 @@ fi
 # ── 4. Oh My Zsh ─────────────────────────────────────────────────────────────
 step "Installing Oh My Zsh..."
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  run sh -c 'RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
-  ok "Oh My Zsh installed"
+  # .zshrc sources $ZSH/oh-my-zsh.sh unconditionally, so a silent failure here
+  # means every new shell starts with an error.
+  try "Oh My Zsh installed" \
+    sh -c 'RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
 else
   ok "Oh My Zsh already installed"
 fi
@@ -428,12 +552,47 @@ PACKAGES=(terminal nvim git claude ssh)
 [[ "$ROLE" == "mac" ]] && PACKAGES+=(mac)
 
 echo "  Packages: ${PACKAGES[*]}"
+
+# Without stow nothing below this point does anything, and every later step
+# (tmux plugins, p10k) reads config that would never have been linked. Fail
+# loudly here rather than printing "Dotfiles linked" over an empty home dir.
+need stow "install.sh links every dotfile with it"
+
 # --adopt moves any pre-existing real file into the repo, then git checkout
 # restores the committed version — this turns "file already exists" conflicts
 # into clean symlinks without hand-deleting anything.
-run stow --adopt -t ~ "${PACKAGES[@]}" --verbose 2>&1
-run git -C "$DOTFILES" checkout -- .
-ok "Dotfiles linked"
+#
+# That `git checkout -- .` is indiscriminate: it reverts the whole worktree, so
+# any uncommitted edit sitting here when the script runs is destroyed along
+# with the adopted files. Check first instead of relying on the README's
+# "commit before running it".
+if (( ! DRY_RUN )) && [[ -n "$(git -C "$DOTFILES" status --porcelain 2>/dev/null)" ]]; then
+  if (( ALLOW_DIRTY )); then
+    warn "Working tree is dirty and --allow-dirty was given — these changes will be discarded:"
+    git -C "$DOTFILES" status --short | sed 's/^/      /'
+  else
+    fail "Working tree at $DOTFILES has uncommitted changes."
+    git -C "$DOTFILES" status --short | sed 's/^/      /'
+    echo ""
+    echo "  Linking uses 'stow --adopt' followed by 'git checkout -- .', which would"
+    echo "  discard all of the above. Commit or stash first:"
+    echo "    git -C $DOTFILES stash"
+    echo ""
+    echo "  Or re-run with --allow-dirty to throw them away deliberately."
+    exit 1
+  fi
+fi
+
+if run stow --adopt -t ~ "${PACKAGES[@]}" --verbose 2>&1; then
+  run git -C "$DOTFILES" checkout -- .
+  ok "Dotfiles linked"
+else
+  fail "stow failed — dotfiles are NOT linked"
+  record_failure "stow (dotfiles not linked)"
+  # Adopted files are sitting in the repo now; put them back either way so the
+  # tree is not left in a half-migrated state.
+  run git -C "$DOTFILES" checkout -- .
+fi
 
 # ── 6. Tmux plugins via TPM ──────────────────────────────────────────────────
 step "Installing tmux plugins..."
@@ -454,12 +613,17 @@ if [ -d "$TPM_DIR/bin" ] && command -v tmux &>/dev/null; then
     echo -e "  ${BLUE}[dry-run]${NC} $TPM_DIR/bin/install_plugins"
   else
     tmux new-session -d -s _tpm_install 2>/dev/null || true
+    # Kill the throwaway session even if install_plugins dies or the user hits
+    # Ctrl-C, so a failed run does not leave a stray server behind.
+    trap 'tmux kill-session -t _tpm_install 2>/dev/null || true' EXIT INT TERM
     if "$TPM_DIR/bin/install_plugins" >/dev/null 2>&1; then
       ok "tmux plugins installed ($(find "$HOME/.config/tmux/plugins" -maxdepth 1 -mindepth 1 -type d | wc -l) total)"
     else
       warn "Some tmux plugins failed — open tmux and press prefix+I to retry"
+      record_failure "tmux plugins (retry with prefix+I)"
     fi
     tmux kill-session -t _tpm_install 2>/dev/null || true
+    trap - EXIT INT TERM
   fi
 fi
 
@@ -556,9 +720,15 @@ set -euo pipefail
 sudo systemctl stop lightdm
 echo "Desktop stopped."
 EOF
-      chmod +x "$HOME/.local/bin/desktop-start" "$HOME/.local/bin/desktop-stop"
+      if chmod +x "$HOME/.local/bin/desktop-start" "$HOME/.local/bin/desktop-stop"; then
+        ok "desktop-start / desktop-stop installed to ~/.local/bin"
+      else
+        warn "Could not write desktop-start / desktop-stop to ~/.local/bin"
+        record_failure "desktop-start / desktop-stop helpers"
+      fi
+    else
+      ok "desktop-start / desktop-stop installed to ~/.local/bin"
     fi
-    ok "desktop-start / desktop-stop installed to ~/.local/bin"
 
   elif [[ "$ROLE" == "workstation" ]]; then
     step "Desktop policy (workstation role)..."
@@ -603,7 +773,19 @@ fi
 # ── Done ─────────────────────────────────────────────────────────────────────
 echo ""
 echo "=================================================="
-echo " Done! A few manual steps left:"
+if (( ${#FAILURES[@]} )); then
+  echo " Finished with ${#FAILURES[@]} failure(s):"
+  echo "=================================================="
+  for f in "${FAILURES[@]}"; do fail "$f"; done
+  echo ""
+  echo " Everything else completed. Fix the above and re-run — the script is"
+  echo " idempotent, so already-installed steps are skipped."
+  echo ""
+  echo "=================================================="
+  echo " Manual steps:"
+else
+  echo " Done! A few manual steps left:"
+fi
 echo "=================================================="
 
 if [[ "$OS" == "mac" ]]; then
@@ -612,8 +794,17 @@ if [[ "$OS" == "mac" ]]; then
   manual "  security add-generic-password -s dotfiles -a SUPABASE_ACCESS_TOKEN -w '<value>'"
   manual "SSH key: ssh-keygen -t ed25519 -C 'klavierplayer23@gmail.com'"
   manual "Add SSH key to GitHub: cat ~/.ssh/id_ed25519.pub | pbcopy → github.com/settings/keys"
-  manual "Sign into App Store, then re-run: brew bundle install (for MAS apps)"
-  manual "Tailscale / Raycast: open each app → sign in"
+  manual "Tailscale: open the app → sign in"
+  if (( WITH_APPS )); then
+    manual "Sign into the App Store, then re-run for the MAS apps (Xcode, TestFlight, …):"
+    manual "  brew bundle install --file=$DOTFILES/Brewfile.apps"
+    manual "Raycast: open the app → sign in"
+  else
+    manual "This was the lean install. Coding apps (Cursor, Codex, Xcode, Arc, Raycast):"
+    manual "  brew bundle install --file=$DOTFILES/Brewfile.apps"
+  fi
+  manual "Heavy/per-project extras (Android Studio, Godot, Postgres):"
+  manual "  brew bundle install --file=$DOTFILES/Brewfile.optional"
 else
   manual "Secrets: create ~/.secrets with 'export DATABASE_URL=...' etc (gitignored)"
   manual "SSH key: ssh-keygen -t ed25519 -C 'klavierplayer23@gmail.com'"
@@ -629,3 +820,9 @@ manual "Run: gh auth login"
 manual "Run: atuin login"
 echo ""
 echo "Verify the symlinks landed correctly with: $DOTFILES/check.sh"
+
+# Exit non-zero when anything failed. Without this the script always reported
+# success, so a half-finished install looked identical to a clean one — both to
+# a human skimming the tail and to anything running this unattended.
+(( ${#FAILURES[@]} )) && exit 1
+exit 0

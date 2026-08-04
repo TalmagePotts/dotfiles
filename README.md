@@ -36,9 +36,44 @@ Pass `--no-desktop` to skip installing a desktop environment at all.
 
 | Flag | Effect |
 |---|---|
+| `--with-apps` | macOS: also install the coding apps (see tiers below) |
 | `--with-clipsync` | Install + enable the ClipSync clipboard-sync daemon |
 | `--no-desktop` | `--server` only: don't install a desktop environment |
+| `--allow-dirty` | Link dotfiles even with uncommitted changes here — **discards them** (see below) |
 | `--dry-run` | Print actions without performing them |
+
+`install.sh` exits non-zero if any step failed, and prints a summary of exactly
+which ones at the end. Individual failures don't abort the run — one missing
+package shouldn't cost you the other twenty steps — so check the tail.
+
+### macOS package tiers
+
+**A plain `./install.sh` is lean.** It installs the terminal toolchain and the
+few GUI apps that are load-bearing — and nothing else. Heavy things are opt-in,
+because most installs are servers, VMs and fresh boxes that will never open
+Xcode.
+
+| Tier | File | Installed by | Contents |
+|---|---|---|---|
+| Lean | `Brewfile` | always | Terminal tools (`stow`, `rg`, `fd`, `bat`, `fzf`, `zoxide`, `jq`, `gh`, `lazygit`, `nvim`, `tmux`, `atuin`, …), Ghostty, Hammerspoon, Obsidian, Tailscale, Moonlight, Nerd Font |
+| Apps | `Brewfile.apps` | `--with-apps` | Cursor, Codex, Arc, Raycast, SF Symbols, `xcode-build-server`, niche CLI (neomutt, w3m, pass, nmap, PDF tools), **and every Mac App Store app incl. Xcode** |
+| Heavy | `Brewfile.optional` | manual only | Android Studio, Godot, Audacity, Postgres, cmake, system Python |
+
+```sh
+./install.sh                                    # lean
+./install.sh --with-apps                        # lean + coding apps
+brew bundle install --file=Brewfile.optional    # the heavy stuff, later
+```
+
+Two rules keep the tiers honest:
+
+- **Anything the stowed dotfiles depend on lives in the lean tier.** Ghostty,
+  Hammerspoon and the Nerd Font look like GUI bloat but aren't optional —
+  Ghostty is the terminal, Hammerspoon's config is in the `mac` package, and
+  p10k renders as garbage without the font.
+- **All App Store entries live in the apps tier**, so the lean install never
+  needs an Apple ID. Signing into the App Store is the step that fails on a
+  fresh machine; the lean path doesn't have it.
 
 ## Packages
 
@@ -49,7 +84,7 @@ Pass `--no-desktop` to skip installing a desktop environment at all.
 | `git` | `.gitconfig`, global gitignore, `gh` config | all |
 | `claude` | Claude Code `settings.json`, `CLAUDE.md`, `herdr-push-status` | all |
 | `ssh` | `~/.ssh/config` (never keys) | all |
-| `mac` | Hammerspoon, Karabiner | macOS only |
+| `mac` | Hammerspoon | macOS only |
 
 Stow one by hand with `stow -t ~ <package>`.
 
@@ -96,7 +131,13 @@ conflicts by moving the existing file **into this repo** and then linking it.
 version, so the net effect is normally harmless.
 
 But if you have uncommitted changes in the repo, `--adopt` will overwrite them
-with whatever happened to be on the machine. Commit before running it.
+with whatever happened to be on the machine, and the `git checkout -- .` that
+follows reverts the **whole worktree** — including edits that had nothing to do
+with stow.
+
+`install.sh` refuses to link when the tree is dirty and tells you what would be
+lost, rather than trusting you to have committed first. Stash or commit, or pass
+`--allow-dirty` to throw the changes away deliberately.
 
 ## Manual steps after install
 

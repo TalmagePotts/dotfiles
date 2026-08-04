@@ -1,0 +1,26 @@
+# Talmage's optional Brewfile — big or situational installs.
+#
+# Deliberately NOT part of the bootstrap. install.sh only runs the main
+# Brewfile, so a fresh Mac comes up fast; pull these in per-machine, when the
+# machine actually needs them:
+#
+#   brew bundle install --file=~/code/dotfiles/Brewfile.optional
+#
+# Or just one:  brew install godot
+#
+# Nothing in the stowed dotfiles depends on anything here. If something starts
+# to, move it into the main Brewfile.
+
+# ── Multi-GB app installs ────────────────────────────────────────────────────
+cask "android-studio"  # Android development
+cask "audacity"        # Audio editor
+cask "godot"           # Game engine
+
+# ── Toolchains, per-project ──────────────────────────────────────────────────
+# These were in the bootstrap for the same "might need it someday" reason that
+# got pnpm/bun/postgresql dropped from the Linux apt list in install.sh. Prefer
+# per-project installs: uv manages Python versions, and Postgres is almost
+# always better off in a container.
+brew "cmake"           # Build system
+brew "postgresql@14"   # PostgreSQL — note: 14 goes EOL in Nov 2026
+brew "python@3.14"     # System Python; uv is usually the better answer

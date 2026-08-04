@@ -15,9 +15,6 @@ buildServer.json
 # tmux plugins (installed by TPM at runtime)
 terminal/.config/tmux/plugins/
 
-# Karabiner automatic backups
-mac/.config/karabiner/automatic_backups/
-
 # Hammerspoon build artifacts
 mac/.hammerspoon/hs._asm.undocumented.spaces/obj_arm64/
 mac/.hammerspoon/hs._asm.undocumented.spaces
